@@ -1,80 +1,138 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Calcul Ik - Court-circuit BT</title>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      background: #f5f5f5;
-      padding: 20px;
-    }
-    h1 { color: #333; }
-    label {
-      display: block;
-      margin-top: 10px;
-    }
-    input, select {
-      padding: 6px;
-      width: 100%;
-      max-width: 400px;
-      margin-bottom: 10px;
-    }
-    button {
-      margin-top: 15px;
-      padding: 10px 20px;
-      background: #007acc;
-      color: white;
-      border: none;
-      border-radius: 4px;
-      cursor: pointer;
-    }
-    .result {
-      margin-top: 20px;
-      padding: 15px;
-      background: #fff;
-      border-radius: 5px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<title>Calcul Ik3, Ik2, Ik1 - Courants court-circuit</title>
+<style>
+  body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
+  label { display: block; margin-top: 10px; }
+  input, select { width: 100%; max-width: 400px; padding: 6px; margin-bottom: 10px; }
+  button { background: #007acc; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
+  .result { background: white; margin-top: 20px; padding: 15px; border-radius: 5px; }
+</style>
 </head>
 <body>
-  <h1>Calcul des courants de court-circuit (Ik3, Ik2, Ik1)</h1>
 
-  <label>Puissance du transformateur (kVA) :</label>
-  <input type="number" id="kva" value="400">
+<h1>Calcul des courants de court-circuit IK3, IK2, IK1</h1>
 
-  <label>Tension secondaire (V) :</label>
-  <input type="number" id="voltage" value="400">
+<label>Puissance transformateur (kVA) :</label>
+<input type="number" id="kva" value="400" min="0" step="any" />
 
-  <label>Ucc (%) :</label>
-  <input type="number" id="ucc" value="6">
+<label>Tension secondaire (V) :</label>
+<input type="number" id="voltage" value="400" min="0" step="any" />
 
-  <label>Couplage :</label>
-  <select id="couplage">
-    <option value="Dyn5">Dyn5</option>
-    <option value="Yy0">Yy0</option>
-    <option value="Yd11">Yd11</option>
-  </select>
+<label>Ucc (%) :</label>
+<input type="number" id="ucc" value="6" min="0" step="any" />
 
-  <hr>
+<label>Couplage :</label>
+<select id="couplage">
+  <option value="Dyn5">Dyn5</option>
+  <option value="Yy0">Yy0</option>
+  <option value="Yd11">Yd11</option>
+</select>
 
-  <label>Matériau de l’âme :</label>
-  <select id="materiau">
-    <option value="cuivre">Cuivre</option>
-    <option value="aluminium">Aluminium</option>
-  </select>
+<label>Matériau de l’âme :</label>
+<select id="materiau">
+  <option value="cuivre">Cuivre</option>
+  <option value="aluminium">Aluminium</option>
+</select>
 
-  <label>Mode de pose :</label>
-  <select id="pose">
-    <option value="air">À l’air libre</option>
-    <option value="caniveau">En caniveau</option>
-    <option value="terre">En pleine terre</option>
-  </select>
+<label>Longueur câble (m) :</label>
+<input type="number" id="longueur" value="20" min="0" step="any" />
 
-  <label>Longueur (m) :</label>
-  <input type="number" id="longueur" value="20">
+<label>Section phase (mm²) :</label>
+<input type="number" id="section_phase" value="50" min="0" step="any" />
 
-  <label>Section de phase (mm²) :</label>
-  <input type="number" id="section_phase" value="50">
+<label>Nombre de conducteurs par phase :</label>
+<input type="number" id="nb_phase" value="1" min="1" step="1" />
 
-  <labe
+<label>Section neutre (mm²) :</label>
+<input type="number" id="section_neutre" value="50" min="0" step="any" />
+
+<label>Nombre de conducteurs neutre :</label>
+<input type="number" id="nb_neutre" value="1" min="1" step="1" />
+
+<button id="btnCalculate">Calculer</button>
+
+<div class="result" id="result"></div>
+
+<script>
+  // Résistivités en Ohm.mm²/m
+  const resistivities = {
+    cuivre: 0.0172,
+    aluminium: 0.0282
+  };
+
+  // Facteurs couplage pour Ik1
+  const couplingFactors = {
+    Dyn5: 1.0,
+    Yy0: 1.1,
+    Yd11: 1.2
+  };
+
+  function round2(val) {
+    return Math.round(val * 100) / 100;
+  }
+
+  document.getElementById('btnCalculate').addEventListener('click', () => {
+    const kva = parseFloat(document.getElementById('kva').value);
+    const voltage = parseFloat(document.getElementById('voltage').value);
+    const ucc = parseFloat(document.getElementById('ucc').value);
+    const couplage = document.getElementById('couplage').value;
+    const materiau = document.getElementById('materiau').value;
+    const longueur = parseFloat(document.getElementById('longueur').value);
+    const section_phase = parseFloat(document.getElementById('section_phase').value);
+    const nb_phase = parseInt(document.getElementById('nb_phase').value);
+    const section_neutre = parseFloat(document.getElementById('section_neutre').value);
+    const nb_neutre = parseInt(document.getElementById('nb_neutre').value);
+
+    // Validation simple
+    if ([kva, voltage, ucc, longueur, section_phase, nb_phase, section_neutre, nb_neutre].some(x => isNaN(x) || x <= 0)) {
+      document.getElementById('result').textContent = "Merci de saisir des valeurs valides et strictement positives.";
+      return;
+    }
+
+    // Calcul Ik3 (triphasé) - formule standard
+    // Ik3 = (kVA * 1000) / (U * (Ucc / 100))
+    const ik3 = (kva * 1000) / (voltage * (ucc / 100));
+
+    // Résistivité selon matériau
+    const rho = resistivities[materiau] || resistivities.cuivre;
+
+    // Résistance phase (Ohm)
+    const R_phase = rho * longueur / (section_phase * nb_phase);
+
+    // Résistance neutre (Ohm)
+    const R_neutre = rho * longueur / (section_neutre * nb_neutre);
+
+    // Ik2 (court-circuit biphasé)
+    // Théoriquement Ik2 ≈ Ik3 / √3 mais on corrige par résistance phase-phase (deux phases)
+    // R_phase_phase = 2 * R_phase (car 2 phases en série)
+    const R_phase_phase = 2 * R_phase;
+    // Correction par chute de tension R_phase_phase dans le circuit
+    const ik2_corr = ik3 / (1 + (ik3 * R_phase_phase) / voltage);
+    const ik2 = ik2_corr / Math.sqrt(3);
+
+    // Ik1 (court-circuit monophasé)
+    // Théoriquement Ik1 ≈ Ik3 / √3 mais avec résistance phase + neutre
+    const R_phase_neutre = R_phase + R_neutre;
+    // Correction chute de tension R_phase_neutre dans le circuit
+    const ik1_corr = ik3 / (1 + (ik3 * R_phase_neutre) / voltage);
+    let ik1 = ik1_corr / Math.sqrt(3);
+
+    // Application facteur couplage sur Ik1
+    const f_c = couplingFactors[couplage] || 1;
+    ik1 = ik1 / f_c;
+
+    // Affichage résultats
+    document.getElementById('result').innerHTML = `
+      <strong>Résultats :</strong><br>
+      Ik3 (court-circuit triphasé) = ${round2(ik3)} A<br>
+      Ik2 (court-circuit biphasé) = ${round2(ik2)} A<br>
+      Ik1 (court-circuit monophasé) = ${round2(ik1)} A
+    `;
+  });
+</script>
+
+</body>
+</html>
