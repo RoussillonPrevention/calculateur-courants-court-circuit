@@ -1,204 +1,574 @@
-import tkinter as tk
-from tkinter import ttk, messagebox
-import math
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de Courants de Court-Circuit</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        h1, h2 {
+            color: #2c3e50;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 20px;
+            background: #ddd;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background: #fff;
+            border-bottom: 3px solid #3498db;
+        }
+        .tab-content {
+            display: none;
+            padding: 20px;
+            background: #fff;
+            border-radius: 0 0 5px 5px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #f9f9f9;
+            border-radius: 4px;
+        }
+        .result-item {
+            margin-bottom: 10px;
+            font-size: 18px;
+        }
+        .ik3 { color: red; }
+        .ik2 { color: green; }
+        .ik1 { color: blue; }
+        .threshold {
+            background-color: yellow;
+            padding: 5px 10px;
+            display: inline-block;
+            margin-top: 10px;
+        }
+        .chart-container {
+            margin-top: 30px;
+            height: 300px;
+            position: relative;
+        }
+        .chart-bar {
+            position: absolute;
+            bottom: 0;
+            width: 60px;
+            text-align: center;
+        }
+        .chart-bar-ik3 { background-color: red; left: 20%; }
+        .chart-bar-ik2 { background-color: green; left: 40%; }
+        .chart-bar-ik1 { background-color: blue; left: 60%; }
+        .chart-threshold {
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: yellow;
+        }
+        .chart-label {
+            position: absolute;
+            bottom: -25px;
+            width: 60px;
+            text-align: center;
+        }
+        .phase-label { color: red; }
+        .neutral-label { color: blue; }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            border-bottom: 1px dotted black;
+            cursor: help;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .orange-text { color: orange; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Calculateur de Courants de Court-Circuit</h1>
+        
+        <div class="tab-container">
+            <div class="tab active" onclick="openTab('calcul')">Calcul</div>
+            <div class="tab" onclick="openTab('aide')">Aide</div>
+        </div>
+        
+        <div id="calcul" class="tab-content active">
+            <h2>Paramètres du transformateur</h2>
+            
+            <div class="form-group">
+                <label for="puissance">Puissance (kVA) <span class="orange-text">(en orange)</span>:</label>
+                <select id="puissance">
+                    <option value="25">25</option>
+                    <option value="40">40</option>
+                    <option value="50">50</option>
+                    <option value="63">63</option>
+                    <option value="80">80</option>
+                    <option value="100">100</option>
+                    <option value="125">125</option>
+                    <option value="160">160</option>
+                    <option value="200">200</option>
+                    <option value="250">250</option>
+                    <option value="315">315</option>
+                    <option value="400">400</option>
+                    <option value="500">500</option>
+                    <option value="630">630</option>
+                    <option value="800">800</option>
+                    <option value="1000">1000</option>
+                    <option value="1250">1250</option>
+                    <option value="1600">1600</option>
+                    <option value="2000">2000</option>
+                    <option value="2500">2500</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="couplage">Couplage:</label>
+                <select id="couplage">
+                    <option value="Dyn11">Dyn11</option>
+                    <option value="Yyn0">Yyn0</option>
+                    <option value="Dzn0">Dzn0</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="tension_sec">Tension secondaire (V):</label>
+                <input type="number" id="tension_sec" value="400">
+            </div>
+            
+            <div class="form-group">
+                <label for="ucc">Ucc (%):</label>
+                <input type="number" id="ucc" value="4" step="0.1">
+            </div>
+            
+            <div class="form-group">
+                <label for="matiere">Matière des enroulements:</label>
+                <select id="matiere">
+                    <option value="Cuivre">Cuivre</option>
+                    <option value="Aluminium">Aluminium</option>
+                </select>
+            </div>
+            
+            <h2>Paramètres de la canalisation</h2>
+            
+            <div class="form-group">
+                <label for="longueur">Longueur (m):</label>
+                <input type="number" id="longueur" value="10">
+            </div>
+            
+            <div class="form-group">
+                <label for="mode_pose">Mode de pose:</label>
+                <select id="mode_pose">
+                    <option value="Multi/Monoconducteurs en trêfle">Multi/Monoconducteurs en trêfle</option>
+                    <option value="Monoconducteurs jointifs">Monoconducteurs jointifs</option>
+                    <option value="Monoconducteurs espacés">Monoconducteurs espacés</option>
+                </select>
+            </div>
+            
+            <h3 class="phase-label">Conducteurs de phase <span class="phase-label">(en rouge)</span></h3>
+            
+            <div class="form-group">
+                <label for="section_phase">Section (mm²):</label>
+                <select id="section_phase" class="phase-label">
+                    <option value="1.5">1.5</option>
+                    <option value="2.5">2.5</option>
+                    <option value="4">4</option>
+                    <option value="6">6</option>
+                    <option value="10">10</option>
+                    <option value="16">16</option>
+                    <option value="25">25</option>
+                    <option value="35">35</option>
+                    <option value="50">50</option>
+                    <option value="70">70</option>
+                    <option value="95">95</option>
+                    <option value="120">120</option>
+                    <option value="150">150</option>
+                    <option value="185">185</option>
+                    <option value="240">240</option>
+                    <option value="300">300</option>
+                    <option value="400">400</option>
+                    <option value="500">500</option>
+                    <option value="630">630</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="nb_phase">Nombre de conducteurs:</label>
+                <select id="nb_phase" class="phase-label">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            
+            <h3 class="neutral-label">Conducteurs de neutre <span class="neutral-label">(en bleu)</span></h3>
+            
+            <div class="form-group">
+                <label for="section_neutre">Section (mm²):</label>
+                <select id="section_neutre" class="neutral-label">
+                    <option value="1.5">1.5</option>
+                    <option value="2.5">2.5</option>
+                    <option value="4">4</option>
+                    <option value="6">6</option>
+                    <option value="10">10</option>
+                    <option value="16">16</option>
+                    <option value="25">25</option>
+                    <option value="35">35</option>
+                    <option value="50">50</option>
+                    <option value="70">70</option>
+                    <option value="95">95</option>
+                    <option value="120">120</option>
+                    <option value="150">150</option>
+                    <option value="185">185</option>
+                    <option value="240">240</option>
+                    <option value="300">300</option>
+                    <option value="400">400</option>
+                    <option value="500">500</option>
+                    <option value="630">630</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="nb_neutre">Nombre de conducteurs:</label>
+                <select id="nb_neutre" class="neutral-label">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+            
+            <button onclick="calculer()">Calculer</button>
+            
+            <div class="result">
+                <h2>Résultats</h2>
+                <div class="result-item">
+                    Courant de court-circuit triphasé (Ik3): <span id="ik3" class="ik3">-</span>
+                </div>
+                <div class="result-item">
+                    Courant de court-circuit biphasé (Ik2): <span id="ik2" class="ik2">-</span>
+                </div>
+                <div class="result-item">
+                    Courant de court-circuit monophasé (Ik1): <span id="ik1" class="ik1">-</span>
+                </div>
+                <div class="threshold">Seuil de déclenchement: 20kA</div>
+            </div>
+            
+            <div class="chart-container" id="chart">
+                <!-- Le graphique sera généré par JavaScript -->
+            </div>
+        </div>
+        
+        <div id="aide" class="tab-content">
+            <h2>Aide - Termes techniques</h2>
+            
+            <div class="form-group">
+                <h3 class="tooltip">Puissance (kVA)
+                    <span class="tooltiptext">Puissance apparente nominale du transformateur en kilovoltampères.</span>
+                </h3>
+                <p>Puissance apparente nominale du transformateur en kilovoltampères.</p>
+            </div>
+            
+            <div class="form-group">
+                <h3 class="tooltip">Couplage
+                    <span class="tooltiptext">Schéma de connexion des enroulements du transformateur.</span>
+                </h3>
+                <p>Schéma de connexion des enroulements du transformateur. Dyn11: Primaire en triangle, secondaire en étoile avec neutre et déphasage de 30°. Yyn0: Primaire et secondaire en étoile avec neutre et pas de déphasage.</p>
+            </div>
+            
+            <div class="form-group">
+                <h3 class="tooltip">Ucc (%)
+                    <span class="tooltiptext">Tension de court-circuit en pourcentage.</span>
+                </h3>
+                <p>Tension de court-circuit en pourcentage, qui caractérise l'impédance interne du transformateur.</p>
+            </div>
+            
+            <div class="form-group">
+                <h3 class="tooltip">Courant de court-circuit triphasé (Ik3)
+                    <span class="tooltiptext">Courant maximal lors d'un défaut entre les trois phases.</span>
+                </h3>
+                <p>Courant maximal qui circule lors d'un défaut entre les trois phases, sans défaut à la terre.</p>
+            </div>
+            
+            <div class="form-group">
+                <h3 class="tooltip">Courant de court-circuit biphasé (Ik2)
+                    <span class="tooltiptext">Courant maximal lors d'un défaut entre deux phases.</span>
+                </h3>
+                <p>Courant maximal qui circule lors d'un défaut entre deux phases, sans défaut à la terre.</p>
+            </div>
+            
+            <div class="form-group">
+                <h3 class="tooltip">Courant de court-circuit monophasé (Ik1)
+                    <span class="tooltiptext">Courant maximal lors d'un défaut entre une phase et le neutre.</span>
+                </h3>
+                <p>Courant maximal qui circule lors d'un défaut entre une phase et le neutre ou la terre.</p>
+            </div>
+            
+            <div class="form-group">
+                <h3 class="tooltip">Impédance
+                    <span class="tooltiptext">Opposition totale d'un circuit au passage du courant alternatif.</span>
+                </h3>
+                <p>Opposition totale d'un circuit au passage du courant alternatif, composée de la résistance et de la réactance.</p>
+            </div>
+            
+            <div class="form-group">
+                <h3 class="tooltip">Mode de pose
+                    <span class="tooltiptext">Configuration des conducteurs.</span>
+                </h3>
+                <p>Configuration des conducteurs qui influence leur capacité à évacuer la chaleur et donc leur impédance.</p>
+            </div>
+        </div>
+    </div>
 
-class ShortCircuitCalculator:
-    def __init__(self, root):
-        self.root = root
-        self.root.title("Calculateur de Courants de Court-Circuit")
-        
-        # Variables
-        self.puissance_var = tk.StringVar()
-        self.couplage_var = tk.StringVar(value="Dyn11")
-        self.ucc_var = tk.StringVar(value="4")
-        self.materiau_var = tk.StringVar(value="Cuivre")
-        self.tension_var = tk.StringVar(value="400")
-        self.longueur_var = tk.StringVar(value="10")
-        self.mode_pose_var = tk.StringVar(value="Multi")
-        self.section_phase_var = tk.StringVar(value="16")
-        self.nb_phase_var = tk.StringVar(value="1")
-        self.section_neutre_var = tk.StringVar(value="16")
-        self.nb_neutre_var = tk.StringVar(value="1")
-        
-        # Création de l'interface
-        self.create_widgets()
-        
-    def create_widgets(self):
-        # Frame principale
-        main_frame = ttk.Frame(self.root, padding="10")
-        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
-        
-        # Section transformateur
-        ttk.Label(main_frame, text="Paramètres du transformateur", font=('Helvetica', 12, 'bold')).grid(row=0, column=0, columnspan=2, pady=5, sticky=tk.W)
-        
-        ttk.Label(main_frame, text="Puissance (kVA):").grid(row=1, column=0, sticky=tk.W)
-        puissance_cb = ttk.Combobox(main_frame, textvariable=self.puissance_var, 
-                                   values=[25, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 
-                                           630, 800, 1000, 1250, 1600, 2000, 2500])
-        puissance_cb.grid(row=1, column=1, sticky=tk.W)
-        puissance_cb.set(100)
-        
-        ttk.Label(main_frame, text="Couplage:").grid(row=2, column=0, sticky=tk.W)
-        ttk.Combobox(main_frame, textvariable=self.couplage_var, 
-                     values=["Dyn11", "Yyn0", "Dyn5", "Yzn5"]).grid(row=2, column=1, sticky=tk.W)
-        
-        ttk.Label(main_frame, text="Ucc (%):").grid(row=3, column=0, sticky=tk.W)
-        ttk.Entry(main_frame, textvariable=self.ucc_var, width=5).grid(row=3, column=1, sticky=tk.W)
-        
-        ttk.Label(main_frame, text="Materiau:").grid(row=4, column=0, sticky=tk.W)
-        ttk.Combobox(main_frame, textvariable=self.materiau_var, 
-                     values=["Cuivre", "Aluminium"]).grid(row=4, column=1, sticky=tk.W)
-        
-        ttk.Label(main_frame, text="Tension (V):").grid(row=5, column=0, sticky=tk.W)
-        ttk.Entry(main_frame, textvariable=self.tension_var, width=5).grid(row=5, column=1, sticky=tk.W)
-        
-        # Section canalisation
-        ttk.Label(main_frame, text="Paramètres de la canalisation", font=('Helvetica', 12, 'bold')).grid(row=6, column=0, columnspan=2, pady=5, sticky=tk.W)
-        
-        ttk.Label(main_frame, text="Longueur (m):").grid(row=7, column=0, sticky=tk.W)
-        ttk.Entry(main_frame, textvariable=self.longueur_var, width=5).grid(row=7, column=1, sticky=tk.W)
-        
-        ttk.Label(main_frame, text="Mode de pose:").grid(row=8, column=0, sticky=tk.W)
-        ttk.Combobox(main_frame, textvariable=self.mode_pose_var, 
-                     values=["Multi", "Monoconducteurs en trèfle", "Monoconducteurs jointifs", "Monoconducteurs espacés"]).grid(row=8, column=1, sticky=tk.W)
-        
-        # Section conducteurs phase
-        ttk.Label(main_frame, text="Conducteurs de phase", font=('Helvetica', 10, 'bold'), foreground='red').grid(row=9, column=0, columnspan=2, pady=5, sticky=tk.W)
-        
-        ttk.Label(main_frame, text="Section (mm²):").grid(row=10, column=0, sticky=tk.W)
-        section_phase_cb = ttk.Combobox(main_frame, textvariable=self.section_phase_var, 
-                                       values=[1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500, 630])
-        section_phase_cb.grid(row=10, column=1, sticky=tk.W)
-        section_phase_cb.set(16)
-        
-        ttk.Label(main_frame, text="Nombre de conducteurs:").grid(row=11, column=0, sticky=tk.W)
-        ttk.Combobox(main_frame, textvariable=self.nb_phase_var, 
-                     values=[1, 2, 3, 4]).grid(row=11, column=1, sticky=tk.W)
-        
-        # Section conducteurs neutre
-        ttk.Label(main_frame, text="Conducteurs de neutre", font=('Helvetica', 10, 'bold'), foreground='blue').grid(row=12, column=0, columnspan=2, pady=5, sticky=tk.W)
-        
-        ttk.Label(main_frame, text="Section (mm²):").grid(row=13, column=0, sticky=tk.W)
-        section_neutre_cb = ttk.Combobox(main_frame, textvariable=self.section_neutre_var, 
-                                         values=[1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500, 630])
-        section_neutre_cb.grid(row=13, column=1, sticky=tk.W)
-        section_neutre_cb.set(16)
-        
-        ttk.Label(main_frame, text="Nombre de conducteurs:").grid(row=14, column=0, sticky=tk.W)
-        ttk.Combobox(main_frame, textvariable=self.nb_neutre_var, 
-                     values=[1, 2, 3, 4]).grid(row=14, column=1, sticky=tk.W)
-        
-        # Bouton de calcul
-        ttk.Button(main_frame, text="Calculer", command=self.calculate).grid(row=15, column=0, columnspan=2, pady=10)
-        
-        # Résultats
-        self.result_frame = ttk.LabelFrame(main_frame, text="Résultats (kA)", padding="10")
-        self.result_frame.grid(row=16, column=0, columnspan=2, sticky=(tk.W, tk.E))
-        
-        ttk.Label(self.result_frame, text="Ik3 (triphasé):").grid(row=0, column=0, sticky=tk.W)
-        self.ik3_label = ttk.Label(self.result_frame, text="", foreground='red')
-        self.ik3_label.grid(row=0, column=1, sticky=tk.W)
-        
-        ttk.Label(self.result_frame, text="Ik2 (biphasé):").grid(row=1, column=0, sticky=tk.W)
-        self.ik2_label = ttk.Label(self.result_frame, text="", foreground='green')
-        self.ik2_label.grid(row=1, column=1, sticky=tk.W)
-        
-        ttk.Label(self.result_frame, text="Ik1 (monophasé):").grid(row=2, column=0, sticky=tk.W)
-        self.ik1_label = ttk.Label(self.result_frame, text="", foreground='blue')
-        self.ik1_label.grid(row=2, column=1, sticky=tk.W)
-        
-        # Bouton d'aide
-        ttk.Button(main_frame, text="Aide", command=self.show_help).grid(row=17, column=0, columnspan=2, pady=5)
-    
-    def calculate(self):
-        try:
-            # Récupération des valeurs
-            Sn = float(self.puissance_var.get()) * 1000  # Puissance en VA
-            Ucc = float(self.ucc_var.get()) / 100  # Ucc en pu
-            Un = float(self.tension_var.get())  # Tension en V
-            L = float(self.longueur_var.get())  # Longueur en m
+    <script>
+        function openTab(tabName) {
+            // Masquer tous les contenus d'onglets
+            const tabContents = document.getElementsByClassName("tab-content");
+            for (let i = 0; i < tabContents.length; i++) {
+                tabContents[i].classList.remove("active");
+            }
             
-            # Calcul de l'impédance du transformateur
-            Zt = (Ucc * Un**2) / Sn
+            // Désactiver tous les onglets
+            const tabs = document.getElementsByClassName("tab");
+            for (let i = 0; i < tabs.length; i++) {
+                tabs[i].classList.remove("active");
+            }
             
-            # Calcul de l'impédance des câbles
-            # Résistivité selon matériau (Ω.mm²/m)
-            rho = 0.0225 if self.materiau_var.get() == "Aluminium" else 0.018
+            // Activer l'onglet sélectionné
+            document.getElementById(tabName).classList.add("active");
             
-            # Section équivalente et nombre de conducteurs
-            S_phase = float(self.section_phase_var.get())
-            n_phase = int(self.nb_phase_var.get())
-            S_neutre = float(self.section_neutre_var.get())
-            n_neutre = int(self.nb_neutre_var.get())
-            
-            # Résistance des câbles
-            R_phase = (rho * L) / (S_phase * n_phase)
-            R_neutre = (rho * L) / (S_neutre * n_neutre)
-            
-            # Réactance des câbles (approximation)
-            # Valeurs typiques en Ω/m selon mode de pose
-            mode_pose = self.mode_pose_var.get()
-            if mode_pose == "Multi":
-                x = 0.08 / 1000  # Ω/m
-            elif mode_pose == "Monoconducteurs en trèfle":
-                x = 0.10 / 1000
-            elif mode_pose == "Monoconducteurs jointifs":
-                x = 0.13 / 1000
-            else:  # Monoconducteurs espacés
-                x = 0.15 / 1000
+            // Trouver et activer le bouton d'onglet correspondant
+            for (let i = 0; i < tabs.length; i++) {
+                if (tabs[i].textContent.toLowerCase().includes(tabName)) {
+                    tabs[i].classList.add("active");
+                    break;
+                }
+            }
+        }
+        
+        function calculer() {
+            try {
+                // Récupération des valeurs
+                const Sn = parseFloat(document.getElementById("puissance").value) * 1000; // kVA -> VA
+                const U2 = parseFloat(document.getElementById("tension_sec").value);
+                const Ucc = parseFloat(document.getElementById("ucc").value) / 100; // % -> pu
+                const L = parseFloat(document.getElementById("longueur").value);
                 
-            X_phase = x * L
-            X_neutre = x * L
-            
-            # Impédances totales
-            Z_phase = complex(R_phase, X_phase)
-            Z_neutre = complex(R_neutre, X_neutre)
-            Z_total_phase = complex(Zt, 0) + Z_phase
-            Z_total_neutre = complex(Zt, 0) + Z_phase + Z_neutre
-            
-            # Calcul des courants de court-circuit
-            # Ik3 = Un / (sqrt(3) * |Z_total_phase|)
-            ik3 = (Un / (math.sqrt(3) * abs(Z_total_phase))) / 1000  # en kA
-            
-            # Ik2 = Un / (2 * |Z_total_phase|)
-            ik2 = (Un / (2 * abs(Z_total_phase))) / 1000  # en kA
-            
-            # Ik1 = Un / (|Z_total_phase + Z_total_neutre|)
-            ik1 = (Un / abs(Z_total_phase + Z_total_neutre)) / 1000  # en kA
-            
-            # Affichage des résultats
-            self.ik3_label.config(text=f"{ik3:.2f}")
-            self.ik2_label.config(text=f"{ik2:.2f}")
-            self.ik1_label.config(text=f"{ik1:.2f}")
-            
-        except Exception as e:
-            messagebox.showerror("Erreur", f"Une erreur est survenue: {str(e)}")
-    
-    def show_help(self):
-        help_text = """
-        TERMES TECHNIQUES:
+                // Calcul de l'impédance du transformateur
+                const Zt = (Math.pow(U2, 2) / Sn) * Ucc;
+                
+                // Calcul de l'impédance de la ligne
+                const section_phase = parseFloat(document.getElementById("section_phase").value);
+                const nb_phase = parseInt(document.getElementById("nb_phase").value);
+                const section_neutre = parseFloat(document.getElementById("section_neutre").value);
+                const nb_neutre = parseInt(document.getElementById("nb_neutre").value);
+                
+                // Résistivité (Ω.mm²/m)
+                const matiere = document.getElementById("matiere").value;
+                const rho = (matiere === "Aluminium") ? 0.0225 : 0.018;
+                
+                // Résistance ligne (simplifiée)
+                const Rl = (rho * L) / (section_phase * nb_phase);
+                // Réactance ligne (simplifiée)
+                const Xl = 0.08 * L; // Valeur typique
+                
+                const Zl = Math.sqrt(Math.pow(Rl, 2) + Math.pow(Xl, 2));
+                
+                // Impédance totale
+                const Ztot = Zt + Zl;
+                
+                // Courants de court-circuit
+                const Ik3 = U2 / (Math.sqrt(3) * Ztot);
+                const Ik2 = Ik3 * Math.sqrt(3)/2;
+                const Ik1 = U2 / (2 * Ztot); // Simplifié
+                
+                // Affichage des résultats en kA
+                document.getElementById("ik3").textContent = Ik3.toFixed(2) + " kA";
+                document.getElementById("ik2").textContent = Ik2.toFixed(2) + " kA";
+                document.getElementById("ik1").textContent = Ik1.toFixed(2) + " kA";
+                
+                // Dessin du graphique
+                dessinerGraphique(Ik3, Ik2, Ik1);
+                
+            } catch (e) {
+                alert("Une erreur est survenue: " + e.message);
+            }
+        }
         
-        - Puissance (kVA): Puissance apparente du transformateur
-        - Couplage: Configuration des enroulements (ex: Dyn11, Yyn0)
-        - Ucc (%): Tension de court-circuit en pourcentage
-        - Matériau: Conducteur en cuivre ou aluminium
-        - Tension (V): Tension entre phases (ex: 400V)
-        - Longueur (m): Longueur de la canalisation
-        - Mode de pose: Influence la réactance des câbles
-        - Section (mm²): Section des conducteurs
-        - Nombre de conducteurs: Conducteurs en parallèle
-        
-        COURANTS DE COURT-CIRCUIT:
-        
-        - Ik3: Court-circuit triphasé (le plus sévère)
-        - Ik2: Court-circuit biphasé
-        - Ik1: Court-circuit monophasé (phase-neutre)
-        
-        Les résultats sont affichés en kiloampères (kA).
-        """
-        messagebox.showinfo("Aide", help_text)
-
-if __name__ == "__main__":
-    root = tk.Tk()
-    app = ShortCircuitCalculator(root)
-    root.mainloop()
+        function dessinerGraphique(ik3, ik2, ik1) {
+            const chart = document.getElementById("chart");
+            chart.innerHTML = "";
+            
+            const maxVal = Math.max(ik3, ik2, ik1, 20) * 1.2;
+            const height = 300;
+            const barWidth = 60;
+            const margin = 50;
+            
+            // Ligne de seuil
+            const thresholdY = height - (20 / maxVal * (height - margin * 2)) - margin;
+            const thresholdLine = document.createElement("div");
+            thresholdLine.className = "chart-threshold";
+            thresholdLine.style.bottom = thresholdY + "px";
+            thresholdLine.title = "Seuil de 20kA";
+            chart.appendChild(thresholdLine);
+            
+            // Étiquette seuil
+            const thresholdLabel = document.createElement("div");
+            thresholdLabel.textContent = "20kA";
+            thresholdLabel.style.position = "absolute";
+            thresholdLabel.style.right = "20px";
+            thresholdLabel.style.bottom = (thresholdY - 10) + "px";
+            thresholdLabel.style.backgroundColor = "yellow";
+            thresholdLabel.style.padding = "2px 5px";
+            chart.appendChild(thresholdLabel);
+            
+            // Barre Ik3 (rouge)
+            const barHeightIk3 = (ik3 / maxVal * (height - margin * 2));
+            const barIk3 = document.createElement("div");
+            barIk3.className = "chart-bar chart-bar-ik3";
+            barIk3.style.height = barHeightIk3 + "px";
+            barIk3.style.left = "20%";
+            barIk3.title = "Ik3: " + ik3.toFixed(2) + " kA";
+            chart.appendChild(barIk3);
+            
+            // Étiquette Ik3
+            const labelIk3 = document.createElement("div");
+            labelIk3.className = "chart-label";
+            labelIk3.textContent = "Ik3";
+            labelIk3.style.left = "20%";
+            chart.appendChild(labelIk3);
+            
+            // Barre Ik2 (vert)
+            const barHeightIk2 = (ik2 / maxVal * (height - margin * 2));
+            const barIk2 = document.createElement("div");
+            barIk2.className = "chart-bar chart-bar-ik2";
+            barIk2.style.height = barHeightIk2 + "px";
+            barIk2.style.left = "40%";
+            barIk2.title = "Ik2: " + ik2.toFixed(2) + " kA";
+            chart.appendChild(barIk2);
+            
+            // Étiquette Ik2
+            const labelIk2 = document.createElement("div");
+            labelIk2.className = "chart-label";
+            labelIk2.textContent = "Ik2";
+            labelIk2.style.left = "40%";
+            chart.appendChild(labelIk2);
+            
+            // Barre Ik1 (bleu)
+            const barHeightIk1 = (ik1 / maxVal * (height - margin * 2));
+            const barIk1 = document.createElement("div");
+            barIk1.className = "chart-bar chart-bar-ik1";
+            barIk1.style.height = barHeightIk1 + "px";
+            barIk1.style.left = "60%";
+            barIk1.title = "Ik1: " + ik1.toFixed(2) + " kA";
+            chart.appendChild(barIk1);
+            
+            // Étiquette Ik1
+            const labelIk1 = document.createElement("div");
+            labelIk1.className = "chart-label";
+            labelIk1.textContent = "Ik1";
+            labelIk1.style.left = "60%";
+            chart.appendChild(labelIk1);
+            
+            // Axe Y
+            const yAxis = document.createElement("div");
+            yAxis.style.position = "absolute";
+            yAxis.style.left = "10px";
+            yAxis.style.top = margin + "px";
+            yAxis.style.bottom = margin + "px";
+            yAxis.style.width = "1px";
+            yAxis.style.backgroundColor = "#000";
+            chart.appendChild(yAxis);
+            
+            // Graduations axe Y
+            for (let i = 0; i <= maxVal; i += maxVal/5) {
+                const yPos = height - (i / maxVal * (height - margin * 2)) - margin;
+                const tick = document.createElement("div");
+                tick.style.position = "absolute";
+                tick.style.left = "5px";
+                tick.style.width = "10px";
+                tick.style.height = "1px";
+                tick.style.backgroundColor = "#000";
+                tick.style.top = yPos + "px";
+                chart.appendChild(tick);
+                
+                const label = document.createElement("div");
+                label.style.position = "absolute";
+                label.style.left = "20px";
+                label.style.top = (yPos - 8) + "px";
+                label.textContent = i.toFixed(0) + "kA";
+                chart.appendChild(label);
+            }
+        }
+    </script>
+</body>
+</html>
