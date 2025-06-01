@@ -10,23 +10,23 @@
             line-height: 1.6;
             margin: 0;
             padding: 20px;
-            color: #333;
+            background-color: #f5f5f5;
         }
         .container {
             max-width: 1000px;
             margin: 0 auto;
-            background: #f9f9f9;
+            background: white;
             padding: 20px;
             border-radius: 8px;
             box-shadow: 0 0 10px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #2c3e50;
+            color: #333;
             text-align: center;
         }
         h2 {
-            color: #3498db;
-            border-bottom: 2px solid #3498db;
+            color: #444;
+            border-bottom: 1px solid #ddd;
             padding-bottom: 5px;
         }
         .form-group {
@@ -37,7 +37,7 @@
             margin-bottom: 5px;
             font-weight: bold;
         }
-        select, input {
+        input, select {
             width: 100%;
             padding: 8px;
             border: 1px solid #ddd;
@@ -48,34 +48,31 @@
             display: flex;
             gap: 10px;
         }
-        .input-group > div {
+        .input-group div {
             flex: 1;
         }
         button {
-            background-color: #3498db;
+            background-color: #4CAF50;
             color: white;
-            border: none;
             padding: 10px 15px;
+            border: none;
             border-radius: 4px;
             cursor: pointer;
             font-size: 16px;
-            display: block;
-            margin: 20px auto;
+            margin-top: 10px;
         }
         button:hover {
-            background-color: #2980b9;
+            background-color: #45a049;
         }
         .results {
-            margin-top: 30px;
-            padding: 20px;
-            background: #fff;
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f9f9f9;
             border-radius: 4px;
-            box-shadow: 0 0 5px rgba(0,0,0,0.1);
         }
         .result-value {
-            font-size: 24px;
+            font-size: 18px;
             font-weight: bold;
-            margin: 10px 0;
         }
         .ik3 {
             color: red;
@@ -87,30 +84,19 @@
             color: blue;
         }
         .tarif {
-            color: #FFD700;
-            font-weight: bold;
+            color: #ffcc00;
+            background-color: #333;
+            padding: 2px 5px;
         }
-        .transfo-param {
-            color: orange;
-            font-weight: bold;
-        }
-        .phase-param {
-            color: red;
-            font-weight: bold;
-        }
-        .neutral-param {
-            color: blue;
-            font-weight: bold;
-        }
-        .help-icon {
+        .info-icon {
             display: inline-block;
-            width: 18px;
-            height: 18px;
-            background-color: #3498db;
+            width: 16px;
+            height: 16px;
+            background-color: #4CAF50;
             color: white;
             border-radius: 50%;
             text-align: center;
-            line-height: 18px;
+            line-height: 16px;
             font-size: 12px;
             cursor: help;
             margin-left: 5px;
@@ -121,20 +107,20 @@
         }
         .tooltip .tooltiptext {
             visibility: hidden;
-            width: 250px;
+            width: 200px;
             background-color: #555;
             color: #fff;
             text-align: center;
             border-radius: 6px;
-            padding: 10px;
+            padding: 5px;
             position: absolute;
             z-index: 1;
             bottom: 125%;
             left: 50%;
-            margin-left: -125px;
+            margin-left: -100px;
             opacity: 0;
             transition: opacity 0.3s;
-            font-size: 14px;
+            font-size: 12px;
             font-weight: normal;
         }
         .tooltip:hover .tooltiptext {
@@ -142,18 +128,56 @@
             opacity: 1;
         }
         .help-section {
-            margin-top: 40px;
+            margin-top: 30px;
             padding: 15px;
-            background: #e8f4fc;
+            background-color: #f0f8ff;
             border-radius: 4px;
         }
-        .help-section h3 {
-            color: #2c3e50;
-            margin-top: 0;
+        .help-item {
+            margin-bottom: 15px;
         }
-        .help-term {
-            font-weight: bold;
-            color: #2980b9;
+        .help-item h3 {
+            margin-top: 0;
+            color: #0066cc;
+        }
+        .tab {
+            overflow: hidden;
+            border: 1px solid #ccc;
+            background-color: #f1f1f1;
+            border-radius: 4px 4px 0 0;
+        }
+        .tab button {
+            background-color: inherit;
+            float: left;
+            border: none;
+            outline: none;
+            cursor: pointer;
+            padding: 10px 16px;
+            transition: 0.3s;
+            color: #333;
+        }
+        .tab button:hover {
+            background-color: #ddd;
+        }
+        .tab button.active {
+            background-color: #4CAF50;
+            color: white;
+        }
+        .tabcontent {
+            display: none;
+            padding: 15px;
+            border: 1px solid #ccc;
+            border-top: none;
+            border-radius: 0 0 4px 4px;
+            animation: fadeEffect 1s;
+        }
+        @keyframes fadeEffect {
+            from {opacity: 0;}
+            to {opacity: 1;}
+        }
+        .highlight {
+            background-color: #fffacd;
+            padding: 2px;
         }
     </style>
 </head>
@@ -161,259 +185,326 @@
     <div class="container">
         <h1>Calculateur de Courants de Court-Circuit</h1>
         
-        <form id="calcForm">
-            <h2>Paramètres du Transformateur</h2>
-            
-            <div class="form-group">
-                <label for="transfoPower">Puissance du transformateur (kVA) <span class="transfo-param">[25-2500 kVA]</span> <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Puissance apparente nominale du transformateur en kilovolt-ampères (kVA)</span></span></label>
-                <select id="transfoPower" required>
-                    <option value="25">25 kVA</option>
-                    <option value="40">40 kVA</option>
-                    <option value="50">50 kVA</option>
-                    <option value="63">63 kVA</option>
-                    <option value="80">80 kVA</option>
-                    <option value="100" selected>100 kVA</option>
-                    <option value="125">125 kVA</option>
-                    <option value="160">160 kVA</option>
-                    <option value="200">200 kVA</option>
-                    <option value="250">250 kVA</option>
-                    <option value="315">315 kVA</option>
-                    <option value="400">400 kVA</option>
-                    <option value="500">500 kVA</option>
-                    <option value="630">630 kVA</option>
-                    <option value="800">800 kVA</option>
-                    <option value="1000">1000 kVA</option>
-                    <option value="1250">1250 kVA</option>
-                    <option value="1600">1600 kVA</option>
-                    <option value="2000">2000 kVA</option>
-                    <option value="2500">2500 kVA</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="couplage">Couplage du transformateur <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Configuration des enroulements du transformateur (Dyn11 le plus courant)</span></span></label>
-                <select id="couplage" required>
-                    <option value="Dyn11" selected>Dyn11</option>
-                    <option value="Yyn0">Yyn0</option>
-                    <option value="Dyn5">Dyn5</option>
-                    <option value="Yzn5">Yzn5</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="ucc">Tension de court-circuit Ucc (%) <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Tension qu'il faut appliquer au primaire pour que le secondaire parcouru par le courant nominal soit en court-circuit</span></span></label>
-                <input type="number" id="ucc" value="4" step="0.1" min="1" max="20" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="tension">Tension secondaire (V) <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Tension entre phases au secondaire du transformateur (400V pour les réseaux basse tension)</span></span></label>
-                <input type="number" id="tension" value="400" step="1" min="100" max="1000" required>
-            </div>
-            
-            <h2>Paramètres de la Canalisation</h2>
-            
-            <div class="form-group">
-                <label for="material">Âme de la canalisation <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Matériau conducteur utilisé pour les câbles (cuivre ou aluminium)</span></span></label>
-                <select id="material" required>
-                    <option value="cuivre" selected>Cuivre</option>
-                    <option value="aluminium">Aluminium</option>
-                </select>
-            </div>
-            
-            <div class="form-group">
-                <label for="length">Longueur de la canalisation (mètres) <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Longueur totale des câbles entre le transformateur et le point de court-circuit</span></span></label>
-                <input type="number" id="length" value="50" step="0.1" min="0.1" max="1000" required>
-            </div>
-            
-            <div class="form-group">
-                <label for="poseMode">Mode de pose <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Configuration physique des conducteurs influençant leur refroidissement et donc leur impédance</span></span></label>
-                <select id="poseMode" required>
-                    <option value="multi">Multi/Monoconducteurs en trèfle</option>
-                    <option value="jointifs" selected>Monoconducteurs jointifs</option>
-                    <option value="espaces">Monoconducteurs espacés</option>
-                </select>
-            </div>
-            
-            <h3>Paramètres des conducteurs de phase <span class="phase-param">[en rouge]</span></h3>
-            
-            <div class="input-group">
-                <div class="form-group">
-                    <label for="phaseSection">Section (mm²) <span class="phase-param">[1.5-630 mm²]</span> <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Section transversale des conducteurs de phase</span></span></label>
-                    <select id="phaseSection" required>
-                        <option value="1.5">1.5 mm²</option>
-                        <option value="2.5">2.5 mm²</option>
-                        <option value="4">4 mm²</option>
-                        <option value="6">6 mm²</option>
-                        <option value="10">10 mm²</option>
-                        <option value="16">16 mm²</option>
-                        <option value="25" selected>25 mm²</option>
-                        <option value="35">35 mm²</option>
-                        <option value="50">50 mm²</option>
-                        <option value="70">70 mm²</option>
-                        <option value="95">95 mm²</option>
-                        <option value="120">120 mm²</option>
-                        <option value="150">150 mm²</option>
-                        <option value="185">185 mm²</option>
-                        <option value="240">240 mm²</option>
-                        <option value="300">300 mm²</option>
-                        <option value="400">400 mm²</option>
-                        <option value="500">500 mm²</option>
-                        <option value="630">630 mm²</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="phaseCount">Nombre de conducteurs par phase <span class="phase-param">[1-4]</span> <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Nombre de câbles en parallèle pour chaque phase</span></span></label>
-                    <select id="phaseCount" required>
-                        <option value="1" selected>1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                    </select>
-                </div>
-            </div>
-            
-            <h3>Paramètres des conducteurs de neutre <span class="neutral-param">[en bleu]</span></h3>
-            
-            <div class="input-group">
-                <div class="form-group">
-                    <label for="neutralSection">Section (mm²) <span class="neutral-param">[1.5-630 mm²]</span> <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Section transversale des conducteurs de neutre</span></span></label>
-                    <select id="neutralSection" required>
-                        <option value="1.5">1.5 mm²</option>
-                        <option value="2.5">2.5 mm²</option>
-                        <option value="4">4 mm²</option>
-                        <option value="6">6 mm²</option>
-                        <option value="10">10 mm²</option>
-                        <option value="16" selected>16 mm²</option>
-                        <option value="25">25 mm²</option>
-                        <option value="35">35 mm²</option>
-                        <option value="50">50 mm²</option>
-                        <option value="70">70 mm²</option>
-                        <option value="95">95 mm²</option>
-                        <option value="120">120 mm²</option>
-                        <option value="150">150 mm²</option>
-                        <option value="185">185 mm²</option>
-                        <option value="240">240 mm²</option>
-                        <option value="300">300 mm²</option>
-                        <option value="400">400 mm²</option>
-                        <option value="500">500 mm²</option>
-                        <option value="630">630 mm²</option>
-                    </select>
-                </div>
-                
-                <div class="form-group">
-                    <label for="neutralCount">Nombre de conducteurs de neutre <span class="neutral-param">[1-4]</span> <span class="tooltip"><span class="help-icon">?</span><span class="tooltiptext">Nombre de câbles en parallèle pour le neutre</span></span></label>
-                    <select id="neutralCount" required>
-                        <option value="1" selected>1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                    </select>
-                </div>
-            </div>
-            
-            <button type="button" onclick="calculate()">Calculer les courants de court-circuit</button>
-        </form>
+        <div class="tab">
+            <button class="tablinks active" onclick="openTab(event, 'calculator')">Calculateur</button>
+            <button class="tablinks" onclick="openTab(event, 'help')">Aide Technique</button>
+        </div>
         
-        <div class="results" id="results" style="display: none;">
-            <h2>Résultats</h2>
+        <div id="calculator" class="tabcontent" style="display: block;">
+            <form id="calculationForm">
+                <h2>Paramètres du Transformateur</h2>
+                
+                <div class="form-group">
+                    <label for="transformerPower">Puissance du transformateur (kVA) <span class="highlight">(orange)</span>:</label>
+                    <select id="transformerPower" required>
+                        <option value="">Sélectionnez...</option>
+                        <option value="25">25 kVA</option>
+                        <option value="40">40 kVA</option>
+                        <option value="50">50 kVA</option>
+                        <option value="63">63 kVA</option>
+                        <option value="80">80 kVA</option>
+                        <option value="100">100 kVA</option>
+                        <option value="125">125 kVA</option>
+                        <option value="160">160 kVA</option>
+                        <option value="200">200 kVA</option>
+                        <option value="250">250 kVA</option>
+                        <option value="315">315 kVA</option>
+                        <option value="400">400 kVA</option>
+                        <option value="500">500 kVA</option>
+                        <option value="630">630 kVA</option>
+                        <option value="800">800 kVA</option>
+                        <option value="1000">1000 kVA</option>
+                        <option value="1250">1250 kVA</option>
+                        <option value="1600">1600 kVA</option>
+                        <option value="2000">2000 kVA</option>
+                        <option value="2500">2500 kVA</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="couplage">Couplage du transformateur:</label>
+                    <select id="couplage" required>
+                        <option value="">Sélectionnez...</option>
+                        <option value="Dyn11">Dyn11</option>
+                        <option value="Yyn0">Yyn0</option>
+                        <option value="Dzn0">Dzn0</option>
+                        <option value="other">Autre</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="ucc">Tension de court-circuit Ucc (%):</label>
+                    <input type="number" id="ucc" step="0.1" min="1" max="20" value="6" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="tension">Tension composée (V):</label>
+                    <input type="number" id="tension" value="400" required>
+                </div>
+                
+                <h2>Paramètres de la Canalisation</h2>
+                
+                <div class="form-group">
+                    <label for="cableMaterial">Âme de la canalisation:</label>
+                    <select id="cableMaterial" required>
+                        <option value="cuivre">Cuivre</option>
+                        <option value="aluminium">Aluminium</option>
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label for="cableLength">Longueur de la canalisation (m):</label>
+                    <input type="number" id="cableLength" min="0.1" step="0.1" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="installationMode">Mode de pose de la canalisation:</label>
+                    <select id="installationMode" required>
+                        <option value="multi">Multi/Monoconducteurs en trèfle</option>
+                        <option value="jointifs">Monoconducteurs jointifs</option>
+                        <option value="espaces">Monoconducteurs espacés</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <div class="form-group">
+                        <label for="phaseSection">Section conducteur de phase <span class="highlight">(rouge)</span> (mm²):</label>
+                        <select id="phaseSection" required>
+                            <option value="1.5">1.5 mm²</option>
+                            <option value="2.5">2.5 mm²</option>
+                            <option value="4">4 mm²</option>
+                            <option value="6">6 mm²</option>
+                            <option value="10">10 mm²</option>
+                            <option value="16">16 mm²</option>
+                            <option value="25">25 mm²</option>
+                            <option value="35">35 mm²</option>
+                            <option value="50">50 mm²</option>
+                            <option value="70">70 mm²</option>
+                            <option value="95">95 mm²</option>
+                            <option value="120">120 mm²</option>
+                            <option value="150">150 mm²</option>
+                            <option value="185">185 mm²</option>
+                            <option value="240">240 mm²</option>
+                            <option value="300">300 mm²</option>
+                            <option value="400">400 mm²</option>
+                            <option value="500">500 mm²</option>
+                            <option value="630">630 mm²</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="phaseCount">Nombre de conducteurs par phase <span class="highlight">(rouge)</span>:</label>
+                        <select id="phaseCount" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <div class="input-group">
+                    <div class="form-group">
+                        <label for="neutralSection">Section conducteur de neutre <span class="highlight">(bleu)</span> (mm²):</label>
+                        <select id="neutralSection" required>
+                            <option value="1.5">1.5 mm²</option>
+                            <option value="2.5">2.5 mm²</option>
+                            <option value="4">4 mm²</option>
+                            <option value="6">6 mm²</option>
+                            <option value="10">10 mm²</option>
+                            <option value="16">16 mm²</option>
+                            <option value="25">25 mm²</option>
+                            <option value="35">35 mm²</option>
+                            <option value="50">50 mm²</option>
+                            <option value="70">70 mm²</option>
+                            <option value="95">95 mm²</option>
+                            <option value="120">120 mm²</option>
+                            <option value="150">150 mm²</option>
+                            <option value="185">185 mm²</option>
+                            <option value="240">240 mm²</option>
+                            <option value="300">300 mm²</option>
+                            <option value="400">400 mm²</option>
+                            <option value="500">500 mm²</option>
+                            <option value="630">630 mm²</option>
+                        </select>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="neutralCount">Nombre de conducteurs par neutre <span class="highlight">(bleu)</span>:</label>
+                        <select id="neutralCount" required>
+                            <option value="1">1</option>
+                            <option value="2">2</option>
+                            <option value="3">3</option>
+                            <option value="4">4</option>
+                        </select>
+                    </div>
+                </div>
+                
+                <button type="button" onclick="calculateShortCircuit()">Calculer</button>
+            </form>
             
-            <div class="form-group">
-                <label>Courant de court-circuit triphasé (Ik3)</label>
-                <div class="result-value ik3" id="ik3"></div>
-            </div>
-            
-            <div class="form-group">
-                <label>Courant de court-circuit biphasé (Ik2)</label>
-                <div class="result-value ik2" id="ik2"></div>
-            </div>
-            
-            <div class="form-group">
-                <label>Courant de court-circuit monophasé (Ik1)</label>
-                <div class="result-value ik1" id="ik1"></div>
-            </div>
-            
-            <div class="form-group">
-                <label>Courant de court-circuit à l'origine <span class="tarif">[20kA]</span></label>
-                <div class="result-value tarif" id="originCurrent"></div>
+            <div id="results" class="results" style="display: none;">
+                <h2>Résultats</h2>
+                <p>Courant de court-circuit triphasé (Ik3): <span id="ik3" class="result-value ik3">-</span> kA</p>
+                <p>Courant de court-circuit biphasé (Ik2): <span id="ik2" class="result-value ik2">-</span> kA</p>
+                <p>Courant de court-circuit monophasé (Ik1): <span id="ik1" class="result-value ik1">-</span> kA</p>
+                <p>Courant de court-circuit à l'origine: <span class="tarif">20 kA</span></p>
             </div>
         </div>
         
-        <div class="help-section">
-            <h3>Aide et Explications</h3>
-            <p><span class="help-term">Courant de court-circuit triphasé (Ik3)</span>: Courant maximal qui circule lorsqu'un défaut se produit entre les trois phases.</p>
-            <p><span class="help-term">Courant de court-circuit biphasé (Ik2)</span>: Courant qui circule lorsqu'un défaut se produit entre deux phases.</p>
-            <p><span class="help-term">Courant de court-circuit monophasé (Ik1)</span>: Courant qui circule lorsqu'un défaut se produit entre une phase et le neutre.</p>
-            <p><span class="help-term">Tension de court-circuit (Ucc)</span>: Pourcentage de la tension nominale qu'il faut appliquer au primaire pour que le secondaire parcouru par le courant nominal soit en court-circuit.</p>
-            <p><span class="help-term">Impédance</span>: Résistance totale (résistive et réactive) opposée au passage du courant alternatif.</p>
-            <p><span class="help-term">Couplage du transformateur</span>: Configuration des enroulements primaires et secondaires (D pour triangle, Y pour étoile, z pour zigzag, n pour neutre sorti).</p>
+        <div id="help" class="tabcontent">
+            <div class="help-section">
+                <h2>Aide Technique</h2>
+                
+                <div class="help-item">
+                    <h3>Courant de court-circuit triphasé (Ik3) <span class="ik3">●</span></h3>
+                    <p>Le courant de court-circuit triphasé est le courant qui circule lorsqu'un défaut se produit entre les trois phases d'un système électrique triphasé. C'est généralement la valeur la plus élevée des trois types de court-circuit.</p>
+                </div>
+                
+                <div class="help-item">
+                    <h3>Courant de court-circuit biphasé (Ik2) <span class="ik2">●</span></h3>
+                    <p>Le courant de court-circuit biphasé se produit lorsqu'un défaut apparaît entre deux phases. Sa valeur est environ 86% du courant de court-circuit triphasé dans un système symétrique.</p>
+                </div>
+                
+                <div class="help-item">
+                    <h3>Courant de court-circuit monophasé (Ik1) <span class="ik1">●</span></h3>
+                    <p>Le courant de court-circuit monophasé se produit lorsqu'un défaut apparaît entre une phase et le neutre. Sa valeur dépend fortement de l'impédance du circuit de retour (neutre).</p>
+                </div>
+                
+                <div class="help-item">
+                    <h3>Puissance du transformateur <span class="highlight">(orange)</span></h3>
+                    <p>La puissance apparente du transformateur exprimée en kVA (kilovoltampères). Elle représente la capacité de puissance que peut fournir le transformateur.</p>
+                </div>
+                
+                <div class="help-item">
+                    <h3>Tension de court-circuit (Ucc)</h3>
+                    <p>La tension de court-circuit est exprimée en pourcentage de la tension nominale. Elle caractérise l'impédance interne du transformateur et influence directement le courant de court-circuit.</p>
+                </div>
+                
+                <div class="help-item">
+                    <h3>Couplage du transformateur</h3>
+                    <p>Le couplage indique la manière dont les enroulements du transformateur sont connectés. Les couplages courants sont Dyn11, Yyn0 et Dzn0, chacun ayant des caractéristiques particulières pour le courant de court-circuit.</p>
+                </div>
+                
+                <div class="help-item">
+                    <h3>Âme de la canalisation</h3>
+                    <p>Le matériau conducteur utilisé dans les câbles (cuivre ou aluminium). Le cuivre a une meilleure conductivité que l'aluminium, ce qui influence l'impédance de la ligne.</p>
+                </div>
+                
+                <div class="help-item">
+                    <h3>Mode de pose</h3>
+                    <p>La disposition des câbles influence leur capacité à dissiper la chaleur et donc leur impédance. Les modes de pose courants sont :</p>
+                    <ul>
+                        <li><strong>Multi/Monoconducteurs en trèfle</strong>: câbles torsadés ensemble</li>
+                        <li><strong>Monoconducteurs jointifs</strong>: câbles parallèles se touchant</li>
+                        <li><strong>Monoconducteurs espacés</strong>: câbles parallèles espacés</li>
+                    </ul>
+                </div>
+                
+                <div class="help-item">
+                    <h3>Section des conducteurs <span class="highlight">(rouge/bleu)</span></h3>
+                    <p>La section transversale des conducteurs exprimée en mm². Plus la section est grande, plus l'impédance est faible et plus le courant de court-circuit est élevé.</p>
+                </div>
+            </div>
         </div>
     </div>
 
     <script>
-        function calculate() {
+        function openTab(evt, tabName) {
+            var i, tabcontent, tablinks;
+            tabcontent = document.getElementsByClassName("tabcontent");
+            for (i = 0; i < tabcontent.length; i++) {
+                tabcontent[i].style.display = "none";
+            }
+            tablinks = document.getElementsByClassName("tablinks");
+            for (i = 0; i < tablinks.length; i++) {
+                tablinks[i].className = tablinks[i].className.replace(" active", "");
+            }
+            document.getElementById(tabName).style.display = "block";
+            evt.currentTarget.className += " active";
+        }
+
+        function calculateShortCircuit() {
             // Récupération des valeurs du formulaire
-            const transfoPower = parseFloat(document.getElementById('transfoPower').value);
-            const couplage = document.getElementById('couplage').value;
+            const transformerPower = parseFloat(document.getElementById('transformerPower').value);
             const ucc = parseFloat(document.getElementById('ucc').value) / 100; // Conversion en valeur décimale
             const tension = parseFloat(document.getElementById('tension').value);
-            const material = document.getElementById('material').value;
-            const length = parseFloat(document.getElementById('length').value);
-            const poseMode = document.getElementById('poseMode').value;
+            const cableMaterial = document.getElementById('cableMaterial').value;
+            const cableLength = parseFloat(document.getElementById('cableLength').value);
             const phaseSection = parseFloat(document.getElementById('phaseSection').value);
             const phaseCount = parseInt(document.getElementById('phaseCount').value);
             const neutralSection = parseFloat(document.getElementById('neutralSection').value);
             const neutralCount = parseInt(document.getElementById('neutralCount').value);
+            const installationMode = document.getElementById('installationMode').value;
+            const couplage = document.getElementById('couplage').value;
             
-            // Calcul de l'impédance du transformateur
-            const Zt = (ucc * Math.pow(tension, 2)) / (transfoPower * 1000);
-            
-            // Calcul de la résistivité selon le matériau (Ohm.mm²/m)
-            const resistivity = material === 'cuivre' ? 0.0225 : 0.036; // à 20°C
-            
-            // Calcul de la réactance linéique selon le mode de pose
-            let linearReactance;
-            switch(poseMode) {
-                case 'multi':
-                    linearReactance = 0.08; // Ohm/km
-                    break;
-                case 'jointifs':
-                    linearReactance = 0.09; // Ohm/km
-                    break;
-                case 'espaces':
-                    linearReactance = 0.11; // Ohm/km
-                    break;
-                default:
-                    linearReactance = 0.09;
+            // Validation des données
+            if (isNaN(transformerPower) {
+                alert("Veuillez sélectionner la puissance du transformateur");
+                return;
             }
             
-            // Calcul de l'impédance de la canalisation
-            const Rc = (resistivity * length) / (phaseSection * phaseCount);
-            const Xc = (linearReactance * length) / 1000; // Conversion en Ohms
+            // Calcul de l'impédance du transformateur
+            // Zt = (Ucc/100) * (U²/Sn)
+            const zt = ucc * Math.pow(tension, 2) / (transformerPower * 1000);
             
-            // Impédance totale (transformateur + canalisation)
-            const Ztotal = Math.sqrt(Math.pow(Zt + Rc, 2) + Math.pow(Xc, 2));
+            // Calcul de la résistivité du câble
+            // Rho = 0.0225 Ω.mm²/m pour l'aluminium, 0.018 Ω.mm²/m pour le cuivre
+            const rho = cableMaterial === 'aluminium' ? 0.0225 : 0.018;
+            
+            // Calcul de la résistance des câbles
+            // R = (rho * L) / (S * n)
+            const rPhase = (rho * cableLength) / (phaseSection * phaseCount);
+            const rNeutral = (rho * cableLength) / (neutralSection * neutralCount);
+            
+            // Calcul de la réactance des câbles (simplifié)
+            // Valeurs typiques pour les câbles basse tension
+            let xPhase, xNeutral;
+            
+            if (installationMode === 'multi') {
+                // Câbles en trèfle
+                xPhase = 0.08 * cableLength; // Ω/km -> Ω/m
+                xNeutral = 0.08 * cableLength;
+            } else if (installationMode === 'jointifs') {
+                // Câbles jointifs
+                xPhase = 0.10 * cableLength;
+                xNeutral = 0.10 * cableLength;
+            } else {
+                // Câbles espacés
+                xPhase = 0.13 * cableLength;
+                xNeutral = 0.13 * cableLength;
+            }
+            
+            // Impédance totale phase-neutre
+            const zPhase = Math.sqrt(Math.pow(rPhase, 2) + Math.pow(xPhase, 2));
+            const zNeutral = Math.sqrt(Math.pow(rNeutral, 2) + Math.pow(xNeutral, 2));
             
             // Calcul des courants de court-circuit
-            const Ik3 = (tension / Math.sqrt(3)) / Ztotal;
-            const Ik2 = Ik3 * Math.sqrt(3) / 2;
+            // Ik3 = U / (sqrt(3) * Ztotal)
+            const ik3 = (tension / (Math.sqrt(3) * Math.sqrt(Math.pow(zt + zPhase, 2)))) / 1000; // en kA
             
-            // Pour Ik1, on doit prendre en compte l'impédance du neutre
-            const Rn = (resistivity * length) / (neutralSection * neutralCount);
-            const Zn = Math.sqrt(Math.pow(Rc + Rn, 2) + Math.pow(Xc, 2));
-            const Ik1 = tension / (2 * Zn);
+            // Ik2 = U / (2 * Ztotal) (simplifié)
+            const ik2 = (tension / (2 * (zt + zPhase))) / 1000; // en kA
             
-            // Courant de court-circuit à l'origine (20kA)
-            const Iorigine = 20000;
+            // Ik1 = U / (Ztotal + Zneutre) (simplifié)
+            const ik1 = (tension / (zt + zPhase + zNeutral)) / 1000; // en kA
             
             // Affichage des résultats
-            document.getElementById('ik3').textContent = Ik3.toFixed(2) + ' A';
-            document.getElementById('ik2').textContent = Ik2.toFixed(2) + ' A';
-            document.getElementById('ik1').textContent = Ik1.toFixed(2) + ' A';
-            document.getElementById('originCurrent').textContent = Iorigine.toFixed(2) + ' A';
-            
-            // Affichage de la section des résultats
+            document.getElementById('ik3').textContent = ik3.toFixed(2);
+            document.getElementById('ik2').textContent = ik2.toFixed(2);
+            document.getElementById('ik1').textContent = ik1.toFixed(2);
             document.getElementById('results').style.display = 'block';
+            
+            // Ajustement pour le couplage
+            if (couplage === 'Dyn11') {
+                // Pas de modification nécessaire
+            } else if (couplage === 'Yyn0') {
+                // Réduction possible de Ik1
+                document.getElementById('ik1').textContent = (ik1 * 0.9).toFixed(2);
+            } else if (couplage === 'Dzn0') {
+                // Augmentation possible de Ik1
+                document.getElementById('ik1').textContent = (ik1 * 1.1).toFixed(2);
+            }
         }
     </script>
 </body>
