@@ -1,650 +1,166 @@
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Calculateur de Courants de Court-Circuit</title>
-    <style>
-        :root {
-            --phase-color: #e74c3c;
-            --neutral-color: #3498db;
-            --transfo-color: #f39c12;
-            --Ik3-color: #e74c3c;
-            --Ik2-color: #27ae60;
-            --Ik1-color: #3498db;
-            --warning-color: #f1c40f;
-            --background: #f5f5f5;
-            --card-bg: #ffffff;
-            --text-color: #333333;
-            --border-color: #dddddd;
-        }
-        
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            margin: 0;
-            padding: 20px;
-            background-color: var(--background);
-            color: var(--text-color);
-        }
-        
-        .container {
-            max-width: 1000px;
-            margin: 0 auto;
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0,0,0,0.1);
-        }
-        
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-            border-bottom: 2px solid var(--transfo-color);
-            padding-bottom: 10px;
-        }
-        
-        .form-section {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(450px, 1fr));
-            gap: 25px;
-            margin-bottom: 30px;
-        }
-        
-        .form-group {
-            margin-bottom: 20px;
-            position: relative;
-        }
-        
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #2c3e50;
-        }
-        
-        select, input {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid var(--border-color);
-            border-radius: 6px;
-            font-size: 16px;
-            transition: all 0.3s;
-            background-color: #f8f9fa;
-        }
-        
-        select:focus, input:focus {
-            border-color: var(--transfo-color);
-            outline: none;
-            box-shadow: 0 0 0 3px rgba(243, 156, 18, 0.2);
-            background-color: white;
-        }
-        
-        .info-icon {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            background-color: var(--transfo-color);
-            color: white;
-            border-radius: 50%;
-            text-align: center;
-            line-height: 20px;
-            font-size: 13px;
-            margin-left: 8px;
-            cursor: help;
-            vertical-align: middle;
-        }
-        
-        .tooltip {
-            position: relative;
-            display: inline-block;
-        }
-        
-        .tooltip .tooltiptext {
-            visibility: hidden;
-            width: 280px;
-            background-color: #2c3e50;
-            color: #fff;
-            text-align: left;
-            border-radius: 6px;
-            padding: 12px;
-            position: absolute;
-            z-index: 100;
-            bottom: 125%;
-            left: 50%;
-            transform: translateX(-50%);
-            opacity: 0;
-            transition: opacity 0.3s;
-            font-weight: normal;
-            font-size: 14px;
-            line-height: 1.5;
-        }
-        
-        .tooltip:hover .tooltiptext {
-            visibility: visible;
-            opacity: 1;
-        }
-        
-        button {
-            background-color: var(--transfo-color);
-            color: white;
-            padding: 14px 24px;
-            border: none;
-            border-radius: 6px;
-            cursor: pointer;
-            font-size: 18px;
-            font-weight: 600;
-            transition: all 0.3s;
-            display: block;
-            margin: 40px auto;
-            width: 100%;
-            max-width: 300px;
-        }
-        
-        button:hover {
-            background-color: #e67e22;
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-        }
-        
-        .results {
-            background-color: #f8f9fa;
-            padding: 25px;
-            border-radius: 8px;
-            margin-top: 40px;
-            border-left: 6px solid var(--transfo-color);
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
-        }
-        
-        .result-item {
-            margin-bottom: 20px;
-            font-size: 20px;
-            padding: 15px;
-            border-radius: 5px;
-            background-color: white;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-        }
-        
-        .result-label {
-            font-weight: 600;
-        }
-        
-        .result-value {
-            font-weight: 700;
-        }
-        
-        .Ik3 {
-            color: var(--Ik3-color);
-            border-left: 4px solid var(--Ik3-color);
-        }
-        
-        .Ik2 {
-            color: var(--Ik2-color);
-            border-left: 4px solid var(--Ik2-color);
-        }
-        
-        .Ik1 {
-            color: var(--Ik1-color);
-            border-left: 4px solid var(--Ik1-color);
-        }
-        
-        .warning {
-            background-color: rgba(241, 196, 15, 0.1);
-            border-left: 4px solid var(--warning-color);
-            color: var(--warning-color);
-            font-weight: 600;
-        }
-        
-        .help-section {
-            background-color: #eaf2f8;
-            padding: 25px;
-            border-radius: 8px;
-            margin-top: 50px;
-        }
-        
-        .help-section h3 {
-            color: #2c3e50;
-            margin-top: 0;
-            border-bottom: 2px solid var(--transfo-color);
-            padding-bottom: 10px;
-        }
-        
-        .help-item {
-            margin-bottom: 25px;
-        }
-        
-        .help-item h4 {
-            margin-bottom: 8px;
-            color: var(--transfo-color);
-            font-size: 18px;
-        }
-        
-        .phase-color {
-            color: var(--phase-color);
-            font-weight: bold;
-        }
-        
-        .neutral-color {
-            color: var(--neutral-color);
-            font-weight: bold;
-        }
-        
-        .transfo-color {
-            color: var(--transfo-color);
-            font-weight: bold;
-        }
-        
-        .highlight {
-            background-color: rgba(243, 156, 18, 0.1);
-            padding: 2px 5px;
-            border-radius: 3px;
-            font-weight: 600;
-        }
-        
-        @media (max-width: 768px) {
-            .form-section {
-                grid-template-columns: 1fr;
-            }
-            
-            .result-item {
-                flex-direction: column;
-                align-items: flex-start;
-                gap: 5px;
-            }
-        }
-    </style>
-</head>
-<body>
-    <div class="container">
-        <h1>Calculateur de Courants de Court-Circuit</h1>
-        
-        <div class="form-section">
-            <div>
-                <div class="form-group">
-                    <label for="transfo-power" class="transfo-color">
-                        Puissance du transformateur (kVA)
-                        <span class="tooltip">?
-                            <span class="tooltiptext">
-                                <strong>Puissance apparente nominale</strong> du transformateur en kVA.<br><br>
-                                Détermine la capacité de fourniture de courant. Les valeurs standard vont de 25 kVA à 2500 kVA.<br><br>
-                                Plus la puissance est élevée, plus le courant de court-circuit disponible est important.
-                            </span>
-                        </span>
-                    </label>
-                    <select id="transfo-power" style="border-left: 3px solid var(--transfo-color);">
-                        <option value="25">25 kVA</option>
-                        <option value="40">40 kVA</option>
-                        <option value="50">50 kVA</option>
-                        <option value="63">63 kVA</option>
-                        <option value="80">80 kVA</option>
-                        <option value="100" selected>100 kVA</option>
-                        <option value="125">125 kVA</option>
-                        <option value="160">160 kVA</option>
-                        <option value="200">200 kVA</option>
-                        <option value="250">250 kVA</option>
-                        <option value="315">315 kVA</option>
-                        <option value="400">400 kVA</option>
-                        <option value="500">500 kVA</option>
-                        <option value="630">630 kVA</option>
-                        <option value="800">800 kVA</option>
-                        <option value="1000">1000 kVA</option>
-                        <option value="1250">1250 kVA</option>
-                        <option value="1600">1600 kVA</option>
-                        <option value="2000">2000 kVA</option>
-                        <option value="2500">2500 kVA</option>
-                    </select>
-                </div>
+import math
+from typing import Dict, Tuple
 
-                <div class="form-group">
-                    <label for="couplage">
-                        Couplage du transformateur
-                        <span class="tooltip">?
-                            <span class="tooltiptext">
-                                <strong>Configuration des enroulements</strong> primaire et secondaire.<br><br>
-                                <strong>Dyn11</strong>: Primaire en triangle (D), secondaire en étoile (y) avec déphasage de 330° (11 heures).<br>
-                                <strong>Yyn0</strong>: Primaire et secondaire en étoile, pas de déphasage.<br>
-                                <strong>Dzn0</strong>: Primaire en triangle, secondaire en zigzag, pas de déphasage.<br><br>
-                                Le couplage influence la circulation des courants homopolaires.
-                            </span>
-                        </span>
-                    </label>
-                    <select id="couplage">
-                        <option value="Dyn11" selected>Dyn11</option>
-                        <option value="Yyn0">Yyn0</option>
-                        <option value="Dzn0">Dzn0</option>
-                    </select>
-                </div>
+def calculate_short_circuit_currents(
+    transformer_power_kva: float,
+    coupling: str,
+    ucc_percent: float,
+    winding_material: str,
+    cable_length_m: float,
+    installation_method: str,
+    phase_conductor_section: float,
+    phase_conductors_per_phase: int,
+    neutral_conductor_section: float,
+    neutral_conductors: int,
+    network_voltage: float = 400  # Tension triphasée en V
+) -> Dict[str, float]:
+    """
+    Calcule les courants de court-circuit triphasé (Ik3), biphasé (Ik2) et monophasé (Ik1).
+    
+    Args:
+        transformer_power_kva: Puissance du transformateur en kVA (25-2500)
+        coupling: Couplage du transformateur ("Dyn11", "Yyn0", etc.)
+        ucc_percent: Tension de court-circuit en %
+        winding_material: Matériau des enroulements ("cuivre" ou "aluminium")
+        cable_length_m: Longueur de la canalisation en mètres
+        installation_method: Méthode d'installation de la canalisation
+        phase_conductor_section: Section des conducteurs de phase en mm²
+        phase_conductors_per_phase: Nombre de conducteurs par phase (1-4)
+        neutral_conductor_section: Section du conducteur de neutre en mm²
+        neutral_conductors: Nombre de conducteurs de neutre (1-4)
+        network_voltage: Tension réseau phase-phase en V (par défaut 400V)
+    
+    Returns:
+        Dictionnaire avec les courants de court-circuit en kA:
+        {"Ik3": valeur, "Ik2": valeur, "Ik1": valeur}
+    """
+    
+    # 1. Calcul de l'impédance du transformateur
+    sn = transformer_power_kva * 1000  # Puissance en VA
+    u_cc = ucc_percent / 100
+    zt_per_phase = (u_cc * network_voltage**2) / sn
+    
+    # Facteur de résistance selon le matériau
+    if winding_material.lower() == "cuivre":
+        r_ratio = 0.02  # Rapport R/X pour cuivre
+    else:
+        r_ratio = 0.04  # Rapport R/X pour aluminium
+    
+    rt_per_phase = zt_per_phase * r_ratio
+    xt_per_phase = math.sqrt(zt_per_phase**2 - rt_per_phase**2)
+    
+    # 2. Calcul de l'impédance des câbles
+    # Résistivité des conducteurs (Ω.mm²/m)
+    rho_cu = 0.0225  # Cuivre à 20°C
+    rho_al = 0.036  # Aluminium à 20°C
+    
+    # Résistance des câbles de phase
+    r_phase = (rho_cu * cable_length_m) / (phase_conductor_section * phase_conductors_per_phase)
+    
+    # Réactance des câbles selon méthode d'installation
+    if installation_method == "Multi":
+        x_phase = 0.08 * cable_length_m  # Réactance en mΩ/m pour multiconducteurs
+    elif installation_method == "Monoconducteurs en trêfle":
+        x_phase = 0.10 * cable_length_m
+    elif installation_method == "Monoconducteurs jointifs":
+        x_phase = 0.13 * cable_length_m
+    elif installation_method == "Monoconducteurs espacés":
+        x_phase = 0.15 * cable_length_m
+    else:
+        x_phase = 0.10 * cable_length_m  # Valeur par défaut
+    
+    # Conversion en ohms
+    x_phase /= 1000
+    
+    # Impédance totale de phase
+    r_total = rt_per_phase + r_phase
+    x_total = xt_per_phase + x_phase
+    z_total = math.sqrt(r_total**2 + x_total**2)
+    
+    # 3. Calcul des courants de court-circuit
+    # Courant triphasé Ik3
+    ik3 = (network_voltage / math.sqrt(3)) / z_total
+    
+    # Courant biphasé Ik2
+    ik2 = (network_voltage / 2) / z_total
+    
+    # Courant monophasé Ik1
+    # Calcul de l'impédance du neutre
+    r_neutral = (rho_cu * cable_length_m) / (neutral_conductor_section * neutral_conductors)
+    # On suppose la même réactance que les phases (approximation)
+    z_neutral = math.sqrt(r_neutral**2 + x_phase**2)
+    
+    # Impédance homopolaire (simplifiée)
+    z0 = 3 * z_neutral
+    
+    ik1 = (network_voltage / math.sqrt(3)) / (2*z_total + z0)
+    
+    return {
+        "Ik3": round(ik3 / 1000, 2),  # Conversion en kA
+        "Ik2": round(ik2 / 1000, 2),
+        "Ik1": round(ik1 / 1000, 2)
+    }
 
-                <div class="form-group">
-                    <label for="ucc">
-                        Tension de court-circuit (Ucc %)
-                        <span class="tooltip">?
-                            <span class="tooltiptext">
-                                <strong>Pourcentage de tension nominale</strong> nécessaire pour faire circuler le courant nominal en court-circuit.<br><br>
-                                Valeurs typiques :<br>
-                                - Transformateurs de distribution : 4% à 6%<br>
-                                - Transformateurs de puissance : 8% à 15%<br><br>
-                                Plus Ucc est faible, plus le courant de court-circuit est important.
-                            </span>
-                        </span>
-                    </label>
-                    <input type="number" id="ucc" value="4" min="1" max="20" step="0.1">
-                </div>
+def get_help_section() -> str:
+    """Retourne une section d'aide avec les explications des termes techniques"""
+    return """
+    AIDE - EXPLICATION DES TERMES TECHNIQUES
+    
+    1. Puissance du transformateur (kVA):
+    La puissance apparente que peut délivrer le transformateur. Les valeurs standard vont de 25 kVA à 2500 kVA.
+    
+    2. Couplage du transformateur:
+    Configuration des enroulements (ex: Dyn11, Yyn0). Affecte le comportement en court-circuit.
+    
+    3. Tension de court-circuit (Ucc %):
+    Pourcentage de tension qu'il faut appliquer au primaire pour que le secondaire débite son courant nominal en court-circuit.
+    
+    4. Matériau des enroulements:
+    Cuivre (meilleure conductivité) ou aluminium (plus léger et moins cher).
+    
+    5. Méthode d'installation:
+    - Multi: Câble multiconducteur
+    - Monoconducteurs en trêfle: Conducteurs séparés disposés en triangle
+    - Monoconducteurs jointifs: Conducteurs séparés côte à côte
+    - Monoconducteurs espacés: Conducteurs séparés avec espacement
+    
+    6. Courants de court-circuit:
+    - Ik3: Courant de court-circuit triphasé (le plus sévère)
+    - Ik2: Courant de court-circuit biphasé
+    - Ik1: Courant de court-circuit monophasé (implique le neutre)
+    
+    7. Impédance:
+    Opposition totale d'un circuit au courant alternatif, composée de:
+    - Résistance (R): Opposition au courant continu
+    - Réactance (X): Opposition due à l'inductance/capacité
+    """
 
-                <div class="form-group">
-                    <label for="material">
-                        Matériau des conducteurs
-                        <span class="tooltip">?
-                            <span class="tooltiptext">
-                                <strong>Cuivre</strong>: Meilleure conductivité (58 MS/m) mais plus cher.<br>
-                                <strong>Aluminium</strong>: Conductivité moindre (37 MS/m) mais plus léger et économique.<br><br>
-                                Influence la résistance des câbles et donc les courants de court-circuit.
-                            </span>
-                        </span>
-                    </label>
-                    <select id="material">
-                        <option value="cuivre" selected>Cuivre</option>
-                        <option value="aluminium">Aluminium</option>
-                    </select>
-                </div>
-            </div>
-
-            <div>
-                <div class="form-group">
-                    <label for="length">
-                        Longueur de la canalisation (m)
-                        <span class="tooltip">?
-                            <span class="tooltiptext">
-                                <strong>Distance</strong> entre le transformateur et le point de court-circuit.<br><br>
-                                Plus la longueur est grande, plus l'impédance de la ligne est importante, ce qui réduit les courants de court-circuit.<br><br>
-                                Les valeurs typiques vont de quelques mètres à plusieurs centaines de mètres.
-                            </span>
-                        </span>
-                    </label>
-                    <input type="number" id="length" value="10" min="1" max="1000">
-                </div>
-
-                <div class="form-group">
-                    <label for="installation-mode">
-                        Mode de pose de la canalisation
-                        <span class="tooltip">?
-                            <span class="tooltiptext">
-                                Influence la <strong>réactance</strong> et la <strong>dissipation thermique</strong> des câbles.<br><br>
-                                <strong>Aérien</strong>: Réactance plus élevée (environ 0,13 Ω/km)<br>
-                                <strong>Canalisation enterrée</strong>: Réactance moyenne (environ 0,09 Ω/km)<br>
-                                <strong>Gaine électrique</strong>: Réactance plus faible (environ 0,08 Ω/km)<br><br>
-                                Affecte le calcul des courants de court-circuit.
-                            </span>
-                        </span>
-                    </label>
-                    <select id="installation-mode">
-                        <option value="aerien" selected>Aérien</option>
-                        <option value="canalisation">Canalisation enterrée</option>
-                        <option value="gaine">Gaine électrique</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="phase-section" class="phase-color">
-                        Section des conducteurs de phase (mm²)
-                        <span class="tooltip">?
-                            <span class="tooltiptext">
-                                <strong>Aire de la section transversale</strong> des conducteurs de phase.<br><br>
-                                Les sections normalisées vont de 1,5 mm² à 630 mm².<br><br>
-                                Plus la section est grande, plus la <strong>résistance</strong> est faible et plus le courant de court-circuit est important.<br><br>
-                                Les conducteurs de phase sont généralement marqués en <span style="color: var(--phase-color); font-weight: bold;">rouge</span>, jaune et bleu.
-                            </span>
-                        </span>
-                    </label>
-                    <select id="phase-section" style="border-left: 3px solid var(--phase-color);">
-                        <option value="1.5">1.5 mm²</option>
-                        <option value="2.5">2.5 mm²</option>
-                        <option value="4">4 mm²</option>
-                        <option value="6">6 mm²</option>
-                        <option value="10">10 mm²</option>
-                        <option value="16">16 mm²</option>
-                        <option value="25" selected>25 mm²</option>
-                        <option value="35">35 mm²</option>
-                        <option value="50">50 mm²</option>
-                        <option value="70">70 mm²</option>
-                        <option value="95">95 mm²</option>
-                        <option value="120">120 mm²</option>
-                        <option value="150">150 mm²</option>
-                        <option value="185">185 mm²</option>
-                        <option value="240">240 mm²</option>
-                        <option value="300">300 mm²</option>
-                        <option value="400">400 mm²</option>
-                        <option value="500">500 mm²</option>
-                        <option value="630">630 mm²</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="phase-conductors" class="phase-color">
-                        Nombre de conducteurs par phase
-                        <span class="tooltip">?
-                            <span class="tooltiptext">
-                                <strong>Nombre de câbles en parallèle</strong> pour chaque phase.<br><br>
-                                Permet de réduire la résistance totale de la ligne en divisant le courant entre plusieurs conducteurs.<br><br>
-                                Les valeurs vont généralement de 1 à 4 conducteurs par phase.
-                            </span>
-                        </span>
-                    </label>
-                    <select id="phase-conductors" style="border-left: 3px solid var(--phase-color);">
-                        <option value="1" selected>1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="neutral-section" class="neutral-color">
-                        Section du conducteur de neutre (mm²)
-                        <span class="tooltip">?
-                            <span class="tooltiptext">
-                                <strong>Aire de la section transversale</strong> du conducteur neutre.<br><br>
-                                Souvent égale ou inférieure à la section des phases (généralement marquée en <span style="color: var(--neutral-color); font-weight: bold;">bleu</span>).<br><br>
-                                Pour les circuits triphasés équilibrés, le neutre ne transporte pas de courant, mais il est essentiel pour les défauts monophasés.
-                            </span>
-                        </span>
-                    </label>
-                    <select id="neutral-section" style="border-left: 3px solid var(--neutral-color);">
-                        <option value="1.5">1.5 mm²</option>
-                        <option value="2.5">2.5 mm²</option>
-                        <option value="4">4 mm²</option>
-                        <option value="6">6 mm²</option>
-                        <option value="10">10 mm²</option>
-                        <option value="16" selected>16 mm²</option>
-                        <option value="25">25 mm²</option>
-                        <option value="35">35 mm²</option>
-                        <option value="50">50 mm²</option>
-                        <option value="70">70 mm²</option>
-                        <option value="95">95 mm²</option>
-                        <option value="120">120 mm²</option>
-                        <option value="150">150 mm²</option>
-                        <option value="185">185 mm²</option>
-                        <option value="240">240 mm²</option>
-                        <option value="300">300 mm²</option>
-                        <option value="400">400 mm²</option>
-                        <option value="500">500 mm²</option>
-                        <option value="630">630 mm²</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label for="neutral-conductors" class="neutral-color">
-                        Nombre de conducteurs de neutre
-                        <span class="tooltip">?
-                            <span class="tooltiptext">
-                                <strong>Nombre de câbles neutres en parallèle</strong>.<br><br>
-                                Généralement égal au nombre de conducteurs de phase pour maintenir l'équilibre.<br><br>
-                                Important pour le calcul des défauts monophasés (court-circuit phase-neutre).
-                            </span>
-                        </span>
-                    </label>
-                    <select id="neutral-conductors" style="border-left: 3px solid var(--neutral-color);">
-                        <option value="1" selected>1</option>
-                        <option value="2">2</option>
-                        <option value="3">3</option>
-                        <option value="4">4</option>
-                    </select>
-                </div>
-            </div>
-        </div>
-
-        <button onclick="calculate()">Calculer les courants de court-circuit</button>
-
-        <div class="results" id="results" style="display: none;">
-            <h2>Résultats des calculs</h2>
-            
-            <div class="result-item Ik3">
-                <div class="result-label">Ik3 (Court-circuit triphasé):</div>
-                <div class="result-value"><span id="Ik3">-</span> kA</div>
-            </div>
-            
-            <div class="result-item Ik2">
-                <div class="result-label">Ik2 (Court-circuit biphasé):</div>
-                <div class="result-value"><span id="Ik2">-</span> kA</div>
-            </div>
-            
-            <div class="result-item Ik1">
-                <div class="result-label">Ik1 (Court-circuit monophasé):</div>
-                <div class="result-value"><span id="Ik1">-</span> kA</div>
-            </div>
-            
-            <div class="result-item warning" id="tarif-warning" style="display: none;">
-                <div>
-                    <strong>Attention:</strong> Le courant de court-circuit à l'origine dépasse 20 kA.<br>
-                    Vérifiez le pouvoir de coupure des dispositifs de protection.
-                </div>
-            </div>
-        </div>
-
-        <div class="help-section">
-            <h3>Aide et explications techniques</h3>
-            
-            <div class="help-item">
-                <h4>Courants de court-circuit</h4>
-                <p><strong class="Ik3">Ik3 (Triphasé)</strong>: Courant maximal qui circule lorsqu'un court-circuit se produit entre les trois phases. C'est le défaut le plus sévère.</p>
-                <p><strong class="Ik2">Ik2 (Biphasé)</strong>: Courant de court-circuit entre deux phases. Généralement égal à √3/2 × Ik3.</p>
-                <p><strong class="Ik1">Ik1 (Monophasé)</strong>: Courant de court-circuit entre une phase et le neutre. Dépend fortement de l'impédance du neutre.</p>
-                <p><strong class="highlight">Tarif jaune (20 kA à l'origine)</strong>: Seuil important pour le choix des dispositifs de protection. Au-delà de 20 kA, des équipements spéciaux sont nécessaires.</p>
-            </div>
-            
-            <div class="help-item">
-                <h4>Paramètres du transformateur</h4>
-                <p><strong class="transfo-color">Puissance (kVA)</strong>: Plus la puissance est élevée, plus le courant de court-circuit disponible est important.</p>
-                <p><strong>Ucc (%)</strong>: La tension de court-circuit exprimée en pourcentage de la tension nominale. Un faible Ucc donne des courants de court-circuit plus élevés.</p>
-                <p><strong>Couplage</strong>: La configuration Dyn11 est la plus courante pour les transformateurs de distribution. Influence la circulation des courants homopolaires.</p>
-            </div>
-            
-            <div class="help-item">
-                <h4>Paramètres des câbles</h4>
-                <p><strong class="phase-color">Conducteurs de phase</strong>: Leur section et nombre influencent directement la résistance et donc les courants de défaut.</p>
-                <p><strong class="neutral-color">Conducteur de neutre</strong>: Essentiel pour les défauts monophasés. Sa section est souvent réduite par rapport aux phases.</p>
-                <p><strong>Longueur</strong>: Plus la distance est grande, plus l'impédance est importante, réduisant les courants de court-circuit.</p>
-                <p><strong>Matériau</strong>: Le cuivre a une meilleure conductivité que l'aluminium (environ 1,5 fois plus conducteur).</p>
-            </div>
-        </div>
-    </div>
-
-    <script>
-        function calculate() {
-            // Récupération des valeurs
-            const power = parseFloat(document.getElementById("transfo-power").value);
-            const ucc = parseFloat(document.getElementById("ucc").value);
-            const length = parseFloat(document.getElementById("length").value);
-            const phaseSection = parseFloat(document.getElementById("phase-section").value);
-            const neutralSection = parseFloat(document.getElementById("neutral-section").value);
-            const material = document.getElementById("material").value;
-            const phaseConductors = parseInt(document.getElementById("phase-conductors").value);
-            const neutralConductors = parseInt(document.getElementById("neutral-conductors").value);
-            const installationMode = document.getElementById("installation-mode").value;
-            const coupling = document.getElementById("couplage").value;
-
-            // Tension secondaire (400V par défaut pour un réseau basse tension)
-            const U = 400; // Volts
-
-            // 1. Calcul de l'impédance du transformateur (Zt)
-            const Zt = (ucc / 100) * (U * U) / (power * 1000); // en ohms
-
-            // 2. Calcul des résistances des conducteurs
-            // Résistivité à 20°C (Ω.mm²/m)
-            const rho = (material === "cuivre") ? 0.0225 : 0.036;
-            
-            // Résistance des phases (Rph)
-            const Rph = (rho * length) / (phaseSection * phaseConductors);
-            
-            // Résistance du neutre (Rn)
-            const Rn = (rho * length) / (neutralSection * neutralConductors);
-
-            // 3. Calcul des réactances (X)
-            let Xph, Xn;
-            switch(installationMode) {
-                case "aerien":
-                    Xph = 0.13 * length / 1000; // Ω/km -> Ω
-                    break;
-                case "canalisation":
-                    Xph = 0.09 * length / 1000;
-                    break;
-                case "gaine":
-                    Xph = 0.08 * length / 1000;
-                    break;
-                default:
-                    Xph = 0.1 * length / 1000;
-            }
-            Xn = Xph; // Même réactance pour le neutre
-
-            // 4. Impédances selon le type de défaut
-            // Impédance directe (défaut triphasé)
-            const Zd = Math.sqrt(Math.pow(Rph, 2) + Math.pow(Xph, 2));
-            
-            // Impédance inverse (identique à directe pour les câbles)
-            const Zi = Zd;
-            
-            // Impédance homopolaire (défaut monophasé)
-            // Dépend du couplage du transformateur
-            let Z0;
-            if (coupling === "Dyn11" || coupling === "Dzn0") {
-                // Transformateur avec triangle au primaire
-                Z0 = Math.sqrt(Math.pow(Rph + 2*Rn, 2) + Math.pow(Xph + 2*Xn, 2));
-            } else {
-                // Transformateur étoile-étoile
-                Z0 = Math.sqrt(Math.pow(Rph + Rn, 2) + Math.pow(Xph + Xn, 2));
-            }
-
-            // 5. Calcul des courants de court-circuit
-            // Courant de court-circuit triphasé (Ik3)
-            const Ik3 = (U / Math.sqrt(3)) / (Zt + Zd);
-            
-            // Courant de court-circuit biphasé (Ik2)
-            const Ik2 = (U / 2) / (Zt + Zd);
-            
-            // Courant de court-circuit monophasé (Ik1)
-            const Ik1 = (U / Math.sqrt(3)) / (Zt + Z0);
-
-            // Courant de court-circuit à l'origine (sans impédance des câbles)
-            const Ik_origine = (U / Math.sqrt(3)) / Zt;
-
-            // Affichage des résultats en kA avec 2 décimales
-            document.getElementById("Ik3").textContent = (Ik3 / 1000).toFixed(2);
-            document.getElementById("Ik2").textContent = (Ik2 / 1000).toFixed(2);
-            document.getElementById("Ik1").textContent = (Ik1 / 1000).toFixed(2);
-            
-            // Afficher la section résultats
-            document.getElementById("results").style.display = "block";
-            
-            // Avertissement si Ik_origine > 20kA
-            if (Ik_origine / 1000 > 20) {
-                document.getElementById("tarif-warning").style.display = "flex";
-            } else {
-                document.getElementById("tarif-warning").style.display = "none";
-            }
-        }
-    </script>
-</body>
-</html>
+# Exemple d'utilisation
+if __name__ == "__main__":
+    # Paramètres d'entrée
+    params = {
+        "transformer_power_kva": 400,
+        "coupling": "Dyn11",
+        "ucc_percent": 4,
+        "winding_material": "cuivre",
+        "cable_length_m": 50,
+        "installation_method": "Multi",
+        "phase_conductor_section": 95,
+        "phase_conductors_per_phase": 1,
+        "neutral_conductor_section": 95,
+        "neutral_conductors": 1
+    }
+    
+    # Calcul des courants de court-circuit
+    results = calculate_short_circuit_currents(**params)
+    
+    # Affichage des résultats avec couleurs
+    print("\nRésultats des calculs de court-circuit:")
+    print(f"Ik3 (triphasé): \033[91m{results['Ik3']} kA\033[0m")  # Rouge
+    print(f"Ik2 (biphasé): \033[92m{results['Ik2']} kA\033[0m")   # Vert
+    print(f"Ik1 (monophasé): \033[94m{results['Ik1']} kA\033[0m") # Bleu
+    
+    # Affichage de l'aide si besoin
+    help_request = input("\nVoulez-vous voir l'aide technique ? (o/n): ")
+    if help_request.lower() == 'o':
+        print(get_help_section())
