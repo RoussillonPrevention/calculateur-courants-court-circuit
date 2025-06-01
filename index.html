@@ -1,166 +1,204 @@
+import tkinter as tk
+from tkinter import ttk, messagebox
 import math
-from typing import Dict, Tuple
 
-def calculate_short_circuit_currents(
-    transformer_power_kva: float,
-    coupling: str,
-    ucc_percent: float,
-    winding_material: str,
-    cable_length_m: float,
-    installation_method: str,
-    phase_conductor_section: float,
-    phase_conductors_per_phase: int,
-    neutral_conductor_section: float,
-    neutral_conductors: int,
-    network_voltage: float = 400  # Tension triphasée en V
-) -> Dict[str, float]:
-    """
-    Calcule les courants de court-circuit triphasé (Ik3), biphasé (Ik2) et monophasé (Ik1).
+class ShortCircuitCalculator:
+    def __init__(self, root):
+        self.root = root
+        self.root.title("Calculateur de Courants de Court-Circuit")
+        
+        # Variables
+        self.puissance_var = tk.StringVar()
+        self.couplage_var = tk.StringVar(value="Dyn11")
+        self.ucc_var = tk.StringVar(value="4")
+        self.materiau_var = tk.StringVar(value="Cuivre")
+        self.tension_var = tk.StringVar(value="400")
+        self.longueur_var = tk.StringVar(value="10")
+        self.mode_pose_var = tk.StringVar(value="Multi")
+        self.section_phase_var = tk.StringVar(value="16")
+        self.nb_phase_var = tk.StringVar(value="1")
+        self.section_neutre_var = tk.StringVar(value="16")
+        self.nb_neutre_var = tk.StringVar(value="1")
+        
+        # Création de l'interface
+        self.create_widgets()
+        
+    def create_widgets(self):
+        # Frame principale
+        main_frame = ttk.Frame(self.root, padding="10")
+        main_frame.grid(row=0, column=0, sticky=(tk.W, tk.E, tk.N, tk.S))
+        
+        # Section transformateur
+        ttk.Label(main_frame, text="Paramètres du transformateur", font=('Helvetica', 12, 'bold')).grid(row=0, column=0, columnspan=2, pady=5, sticky=tk.W)
+        
+        ttk.Label(main_frame, text="Puissance (kVA):").grid(row=1, column=0, sticky=tk.W)
+        puissance_cb = ttk.Combobox(main_frame, textvariable=self.puissance_var, 
+                                   values=[25, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 
+                                           630, 800, 1000, 1250, 1600, 2000, 2500])
+        puissance_cb.grid(row=1, column=1, sticky=tk.W)
+        puissance_cb.set(100)
+        
+        ttk.Label(main_frame, text="Couplage:").grid(row=2, column=0, sticky=tk.W)
+        ttk.Combobox(main_frame, textvariable=self.couplage_var, 
+                     values=["Dyn11", "Yyn0", "Dyn5", "Yzn5"]).grid(row=2, column=1, sticky=tk.W)
+        
+        ttk.Label(main_frame, text="Ucc (%):").grid(row=3, column=0, sticky=tk.W)
+        ttk.Entry(main_frame, textvariable=self.ucc_var, width=5).grid(row=3, column=1, sticky=tk.W)
+        
+        ttk.Label(main_frame, text="Materiau:").grid(row=4, column=0, sticky=tk.W)
+        ttk.Combobox(main_frame, textvariable=self.materiau_var, 
+                     values=["Cuivre", "Aluminium"]).grid(row=4, column=1, sticky=tk.W)
+        
+        ttk.Label(main_frame, text="Tension (V):").grid(row=5, column=0, sticky=tk.W)
+        ttk.Entry(main_frame, textvariable=self.tension_var, width=5).grid(row=5, column=1, sticky=tk.W)
+        
+        # Section canalisation
+        ttk.Label(main_frame, text="Paramètres de la canalisation", font=('Helvetica', 12, 'bold')).grid(row=6, column=0, columnspan=2, pady=5, sticky=tk.W)
+        
+        ttk.Label(main_frame, text="Longueur (m):").grid(row=7, column=0, sticky=tk.W)
+        ttk.Entry(main_frame, textvariable=self.longueur_var, width=5).grid(row=7, column=1, sticky=tk.W)
+        
+        ttk.Label(main_frame, text="Mode de pose:").grid(row=8, column=0, sticky=tk.W)
+        ttk.Combobox(main_frame, textvariable=self.mode_pose_var, 
+                     values=["Multi", "Monoconducteurs en trèfle", "Monoconducteurs jointifs", "Monoconducteurs espacés"]).grid(row=8, column=1, sticky=tk.W)
+        
+        # Section conducteurs phase
+        ttk.Label(main_frame, text="Conducteurs de phase", font=('Helvetica', 10, 'bold'), foreground='red').grid(row=9, column=0, columnspan=2, pady=5, sticky=tk.W)
+        
+        ttk.Label(main_frame, text="Section (mm²):").grid(row=10, column=0, sticky=tk.W)
+        section_phase_cb = ttk.Combobox(main_frame, textvariable=self.section_phase_var, 
+                                       values=[1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500, 630])
+        section_phase_cb.grid(row=10, column=1, sticky=tk.W)
+        section_phase_cb.set(16)
+        
+        ttk.Label(main_frame, text="Nombre de conducteurs:").grid(row=11, column=0, sticky=tk.W)
+        ttk.Combobox(main_frame, textvariable=self.nb_phase_var, 
+                     values=[1, 2, 3, 4]).grid(row=11, column=1, sticky=tk.W)
+        
+        # Section conducteurs neutre
+        ttk.Label(main_frame, text="Conducteurs de neutre", font=('Helvetica', 10, 'bold'), foreground='blue').grid(row=12, column=0, columnspan=2, pady=5, sticky=tk.W)
+        
+        ttk.Label(main_frame, text="Section (mm²):").grid(row=13, column=0, sticky=tk.W)
+        section_neutre_cb = ttk.Combobox(main_frame, textvariable=self.section_neutre_var, 
+                                         values=[1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240, 300, 400, 500, 630])
+        section_neutre_cb.grid(row=13, column=1, sticky=tk.W)
+        section_neutre_cb.set(16)
+        
+        ttk.Label(main_frame, text="Nombre de conducteurs:").grid(row=14, column=0, sticky=tk.W)
+        ttk.Combobox(main_frame, textvariable=self.nb_neutre_var, 
+                     values=[1, 2, 3, 4]).grid(row=14, column=1, sticky=tk.W)
+        
+        # Bouton de calcul
+        ttk.Button(main_frame, text="Calculer", command=self.calculate).grid(row=15, column=0, columnspan=2, pady=10)
+        
+        # Résultats
+        self.result_frame = ttk.LabelFrame(main_frame, text="Résultats (kA)", padding="10")
+        self.result_frame.grid(row=16, column=0, columnspan=2, sticky=(tk.W, tk.E))
+        
+        ttk.Label(self.result_frame, text="Ik3 (triphasé):").grid(row=0, column=0, sticky=tk.W)
+        self.ik3_label = ttk.Label(self.result_frame, text="", foreground='red')
+        self.ik3_label.grid(row=0, column=1, sticky=tk.W)
+        
+        ttk.Label(self.result_frame, text="Ik2 (biphasé):").grid(row=1, column=0, sticky=tk.W)
+        self.ik2_label = ttk.Label(self.result_frame, text="", foreground='green')
+        self.ik2_label.grid(row=1, column=1, sticky=tk.W)
+        
+        ttk.Label(self.result_frame, text="Ik1 (monophasé):").grid(row=2, column=0, sticky=tk.W)
+        self.ik1_label = ttk.Label(self.result_frame, text="", foreground='blue')
+        self.ik1_label.grid(row=2, column=1, sticky=tk.W)
+        
+        # Bouton d'aide
+        ttk.Button(main_frame, text="Aide", command=self.show_help).grid(row=17, column=0, columnspan=2, pady=5)
     
-    Args:
-        transformer_power_kva: Puissance du transformateur en kVA (25-2500)
-        coupling: Couplage du transformateur ("Dyn11", "Yyn0", etc.)
-        ucc_percent: Tension de court-circuit en %
-        winding_material: Matériau des enroulements ("cuivre" ou "aluminium")
-        cable_length_m: Longueur de la canalisation en mètres
-        installation_method: Méthode d'installation de la canalisation
-        phase_conductor_section: Section des conducteurs de phase en mm²
-        phase_conductors_per_phase: Nombre de conducteurs par phase (1-4)
-        neutral_conductor_section: Section du conducteur de neutre en mm²
-        neutral_conductors: Nombre de conducteurs de neutre (1-4)
-        network_voltage: Tension réseau phase-phase en V (par défaut 400V)
+    def calculate(self):
+        try:
+            # Récupération des valeurs
+            Sn = float(self.puissance_var.get()) * 1000  # Puissance en VA
+            Ucc = float(self.ucc_var.get()) / 100  # Ucc en pu
+            Un = float(self.tension_var.get())  # Tension en V
+            L = float(self.longueur_var.get())  # Longueur en m
+            
+            # Calcul de l'impédance du transformateur
+            Zt = (Ucc * Un**2) / Sn
+            
+            # Calcul de l'impédance des câbles
+            # Résistivité selon matériau (Ω.mm²/m)
+            rho = 0.0225 if self.materiau_var.get() == "Aluminium" else 0.018
+            
+            # Section équivalente et nombre de conducteurs
+            S_phase = float(self.section_phase_var.get())
+            n_phase = int(self.nb_phase_var.get())
+            S_neutre = float(self.section_neutre_var.get())
+            n_neutre = int(self.nb_neutre_var.get())
+            
+            # Résistance des câbles
+            R_phase = (rho * L) / (S_phase * n_phase)
+            R_neutre = (rho * L) / (S_neutre * n_neutre)
+            
+            # Réactance des câbles (approximation)
+            # Valeurs typiques en Ω/m selon mode de pose
+            mode_pose = self.mode_pose_var.get()
+            if mode_pose == "Multi":
+                x = 0.08 / 1000  # Ω/m
+            elif mode_pose == "Monoconducteurs en trèfle":
+                x = 0.10 / 1000
+            elif mode_pose == "Monoconducteurs jointifs":
+                x = 0.13 / 1000
+            else:  # Monoconducteurs espacés
+                x = 0.15 / 1000
+                
+            X_phase = x * L
+            X_neutre = x * L
+            
+            # Impédances totales
+            Z_phase = complex(R_phase, X_phase)
+            Z_neutre = complex(R_neutre, X_neutre)
+            Z_total_phase = complex(Zt, 0) + Z_phase
+            Z_total_neutre = complex(Zt, 0) + Z_phase + Z_neutre
+            
+            # Calcul des courants de court-circuit
+            # Ik3 = Un / (sqrt(3) * |Z_total_phase|)
+            ik3 = (Un / (math.sqrt(3) * abs(Z_total_phase))) / 1000  # en kA
+            
+            # Ik2 = Un / (2 * |Z_total_phase|)
+            ik2 = (Un / (2 * abs(Z_total_phase))) / 1000  # en kA
+            
+            # Ik1 = Un / (|Z_total_phase + Z_total_neutre|)
+            ik1 = (Un / abs(Z_total_phase + Z_total_neutre)) / 1000  # en kA
+            
+            # Affichage des résultats
+            self.ik3_label.config(text=f"{ik3:.2f}")
+            self.ik2_label.config(text=f"{ik2:.2f}")
+            self.ik1_label.config(text=f"{ik1:.2f}")
+            
+        except Exception as e:
+            messagebox.showerror("Erreur", f"Une erreur est survenue: {str(e)}")
     
-    Returns:
-        Dictionnaire avec les courants de court-circuit en kA:
-        {"Ik3": valeur, "Ik2": valeur, "Ik1": valeur}
-    """
-    
-    # 1. Calcul de l'impédance du transformateur
-    sn = transformer_power_kva * 1000  # Puissance en VA
-    u_cc = ucc_percent / 100
-    zt_per_phase = (u_cc * network_voltage**2) / sn
-    
-    # Facteur de résistance selon le matériau
-    if winding_material.lower() == "cuivre":
-        r_ratio = 0.02  # Rapport R/X pour cuivre
-    else:
-        r_ratio = 0.04  # Rapport R/X pour aluminium
-    
-    rt_per_phase = zt_per_phase * r_ratio
-    xt_per_phase = math.sqrt(zt_per_phase**2 - rt_per_phase**2)
-    
-    # 2. Calcul de l'impédance des câbles
-    # Résistivité des conducteurs (Ω.mm²/m)
-    rho_cu = 0.0225  # Cuivre à 20°C
-    rho_al = 0.036  # Aluminium à 20°C
-    
-    # Résistance des câbles de phase
-    r_phase = (rho_cu * cable_length_m) / (phase_conductor_section * phase_conductors_per_phase)
-    
-    # Réactance des câbles selon méthode d'installation
-    if installation_method == "Multi":
-        x_phase = 0.08 * cable_length_m  # Réactance en mΩ/m pour multiconducteurs
-    elif installation_method == "Monoconducteurs en trêfle":
-        x_phase = 0.10 * cable_length_m
-    elif installation_method == "Monoconducteurs jointifs":
-        x_phase = 0.13 * cable_length_m
-    elif installation_method == "Monoconducteurs espacés":
-        x_phase = 0.15 * cable_length_m
-    else:
-        x_phase = 0.10 * cable_length_m  # Valeur par défaut
-    
-    # Conversion en ohms
-    x_phase /= 1000
-    
-    # Impédance totale de phase
-    r_total = rt_per_phase + r_phase
-    x_total = xt_per_phase + x_phase
-    z_total = math.sqrt(r_total**2 + x_total**2)
-    
-    # 3. Calcul des courants de court-circuit
-    # Courant triphasé Ik3
-    ik3 = (network_voltage / math.sqrt(3)) / z_total
-    
-    # Courant biphasé Ik2
-    ik2 = (network_voltage / 2) / z_total
-    
-    # Courant monophasé Ik1
-    # Calcul de l'impédance du neutre
-    r_neutral = (rho_cu * cable_length_m) / (neutral_conductor_section * neutral_conductors)
-    # On suppose la même réactance que les phases (approximation)
-    z_neutral = math.sqrt(r_neutral**2 + x_phase**2)
-    
-    # Impédance homopolaire (simplifiée)
-    z0 = 3 * z_neutral
-    
-    ik1 = (network_voltage / math.sqrt(3)) / (2*z_total + z0)
-    
-    return {
-        "Ik3": round(ik3 / 1000, 2),  # Conversion en kA
-        "Ik2": round(ik2 / 1000, 2),
-        "Ik1": round(ik1 / 1000, 2)
-    }
+    def show_help(self):
+        help_text = """
+        TERMES TECHNIQUES:
+        
+        - Puissance (kVA): Puissance apparente du transformateur
+        - Couplage: Configuration des enroulements (ex: Dyn11, Yyn0)
+        - Ucc (%): Tension de court-circuit en pourcentage
+        - Matériau: Conducteur en cuivre ou aluminium
+        - Tension (V): Tension entre phases (ex: 400V)
+        - Longueur (m): Longueur de la canalisation
+        - Mode de pose: Influence la réactance des câbles
+        - Section (mm²): Section des conducteurs
+        - Nombre de conducteurs: Conducteurs en parallèle
+        
+        COURANTS DE COURT-CIRCUIT:
+        
+        - Ik3: Court-circuit triphasé (le plus sévère)
+        - Ik2: Court-circuit biphasé
+        - Ik1: Court-circuit monophasé (phase-neutre)
+        
+        Les résultats sont affichés en kiloampères (kA).
+        """
+        messagebox.showinfo("Aide", help_text)
 
-def get_help_section() -> str:
-    """Retourne une section d'aide avec les explications des termes techniques"""
-    return """
-    AIDE - EXPLICATION DES TERMES TECHNIQUES
-    
-    1. Puissance du transformateur (kVA):
-    La puissance apparente que peut délivrer le transformateur. Les valeurs standard vont de 25 kVA à 2500 kVA.
-    
-    2. Couplage du transformateur:
-    Configuration des enroulements (ex: Dyn11, Yyn0). Affecte le comportement en court-circuit.
-    
-    3. Tension de court-circuit (Ucc %):
-    Pourcentage de tension qu'il faut appliquer au primaire pour que le secondaire débite son courant nominal en court-circuit.
-    
-    4. Matériau des enroulements:
-    Cuivre (meilleure conductivité) ou aluminium (plus léger et moins cher).
-    
-    5. Méthode d'installation:
-    - Multi: Câble multiconducteur
-    - Monoconducteurs en trêfle: Conducteurs séparés disposés en triangle
-    - Monoconducteurs jointifs: Conducteurs séparés côte à côte
-    - Monoconducteurs espacés: Conducteurs séparés avec espacement
-    
-    6. Courants de court-circuit:
-    - Ik3: Courant de court-circuit triphasé (le plus sévère)
-    - Ik2: Courant de court-circuit biphasé
-    - Ik1: Courant de court-circuit monophasé (implique le neutre)
-    
-    7. Impédance:
-    Opposition totale d'un circuit au courant alternatif, composée de:
-    - Résistance (R): Opposition au courant continu
-    - Réactance (X): Opposition due à l'inductance/capacité
-    """
-
-# Exemple d'utilisation
 if __name__ == "__main__":
-    # Paramètres d'entrée
-    params = {
-        "transformer_power_kva": 400,
-        "coupling": "Dyn11",
-        "ucc_percent": 4,
-        "winding_material": "cuivre",
-        "cable_length_m": 50,
-        "installation_method": "Multi",
-        "phase_conductor_section": 95,
-        "phase_conductors_per_phase": 1,
-        "neutral_conductor_section": 95,
-        "neutral_conductors": 1
-    }
-    
-    # Calcul des courants de court-circuit
-    results = calculate_short_circuit_currents(**params)
-    
-    # Affichage des résultats avec couleurs
-    print("\nRésultats des calculs de court-circuit:")
-    print(f"Ik3 (triphasé): \033[91m{results['Ik3']} kA\033[0m")  # Rouge
-    print(f"Ik2 (biphasé): \033[92m{results['Ik2']} kA\033[0m")   # Vert
-    print(f"Ik1 (monophasé): \033[94m{results['Ik1']} kA\033[0m") # Bleu
-    
-    # Affichage de l'aide si besoin
-    help_request = input("\nVoulez-vous voir l'aide technique ? (o/n): ")
-    if help_request.lower() == 'o':
-        print(get_help_section())
+    root = tk.Tk()
+    app = ShortCircuitCalculator(root)
+    root.mainloop()
