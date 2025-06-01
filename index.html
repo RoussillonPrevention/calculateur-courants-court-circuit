@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Calcul Ik - Court-circuit BT</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f5f5f5;
+      padding: 20px;
+    }
+    h1 { color: #333; }
+    label {
+      display: block;
+      margin-top: 10px;
+    }
+    input, select {
+      padding: 6px;
+      width: 100%;
+      max-width: 400px;
+      margin-bottom: 10px;
+    }
+    button {
+      margin-top: 15px;
+      padding: 10px 20px;
+      background: #007acc;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+    .result {
+      margin-top: 20px;
+      padding: 15px;
+      background: #fff;
+      border-radius: 5px;
+    }
+  </style>
+</head>
+<body>
+  <h1>Calcul des courants de court-circuit (Ik3, Ik2, Ik1)</h1>
+
+  <label>Puissance du transformateur (kVA) :</label>
+  <input type="number" id="kva" value="400">
+
+  <label>Tension secondaire (V) :</label>
+  <input type="number" id="voltage" value="400">
+
+  <label>Ucc (%) :</label>
+  <input type="number" id="ucc" value="6">
+
+  <label>Couplage :</label>
+  <select id="couplage">
+    <option value="Dyn5">Dyn5</option>
+    <option value="Yy0">Yy0</option>
+    <option value="Yd11">Yd11</option>
+  </select>
+
+  <hr>
+
+  <label>Matériau de l’âme :</label>
+  <select id="materiau">
+    <option value="cuivre">Cuivre</option>
+    <option value="aluminium">Aluminium</option>
+  </select>
+
+  <label>Mode de pose :</label>
+  <select id="pose">
+    <option value="air">À l’air libre</option>
+    <option value="caniveau">En caniveau</option>
+    <option value="terre">En pleine terre</option>
+  </select>
+
+  <label>Longueur (m) :</label>
+  <input type="number" id="longueur" value="20">
+
+  <label>Section de phase (mm²) :</label>
+  <input type="number" id="section_phase" value="50">
+
+  <labe
