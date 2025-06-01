@@ -1,111 +1,260 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8">
-  <title>Calcul des courants de court-circuit</title>
-  <style>
-    body { font-family: Arial, sans-serif; background: #f5f5f5; padding: 20px; }
-    label { display: block; margin-top: 10px; }
-    input, select { width: 100%; max-width: 400px; padding: 6px; margin-bottom: 10px; }
-    button { background: #007acc; color: white; border: none; padding: 10px 20px; cursor: pointer; border-radius: 4px; }
-    .result { background: white; margin-top: 20px; padding: 15px; border-radius: 5px; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de Courants de Court-Circuit</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f5f5;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        .input-section {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .input-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: 600;
+            color: #34495e;
+        }
+        input, select {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input:focus, select:focus {
+            border-color: #3498db;
+            outline: none;
+            box-shadow: 0 0 5px rgba(52,152,219,0.5);
+        }
+        button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            font-size: 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            display: block;
+            margin: 30px auto;
+            width: 200px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        .results {
+            background-color: #f8f9fa;
+            border-radius: 8px;
+            padding: 20px;
+            margin-top: 30px;
+            border-left: 5px solid #3498db;
+        }
+        .result-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid #eee;
+        }
+        .result-value {
+            font-weight: bold;
+            color: #2c3e50;
+            font-size: 18px;
+        }
+        .unit {
+            color: #7f8c8d;
+            margin-left: 5px;
+        }
+        .note {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 20px;
+            font-style: italic;
+        }
+        @media (max-width: 768px) {
+            .input-section {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
+    <div class="container">
+        <h1>Calculateur de Courants de Court-Circuit</h1>
+        
+        <div class="input-section">
+            <div>
+                <div class="input-group">
+                    <label for="transfo-power">Puissance du transformateur (kVA)</label>
+                    <input type="number" id="transfo-power" value="630" min="1" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <label for="secondary-voltage">Tension secondaire (V)</label>
+                    <input type="number" id="secondary-voltage" value="400" min="1" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <label for="couplage">Couplage du transformateur</label>
+                    <select id="couplage">
+                        <option value="Dyn11">Dyn11</option>
+                        <option value="Yyn0">Yyn0</option>
+                        <option value="Dyn5">Dyn5</option>
+                        <option value="Yzn5">Yzn5</option>
+                        <option value="Dd0">Dd0</option>
+                        <option value="Yy0">Yy0</option>
+                    </select>
+                </div>
+                
+                <div class="input-group">
+                    <label for="ucc">Tension de court-circuit Ucc (%)</label>
+                    <input type="number" id="ucc" value="4" min="0.1" max="20" step="0.1">
+                </div>
+            </div>
+            
+            <div>
+                <div class="input-group">
+                    <label for="cable-length">Longueur du câble (m)</label>
+                    <input type="number" id="cable-length" value="50" min="0.1" step="0.1">
+                </div>
+                
+                <div class="input-group">
+                    <label for="phase-section">Section des phases (mm²)</label>
+                    <input type="number" id="phase-section" value="150" min="1" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <label for="conductors-per-phase">Nombre de conducteurs par phase</label>
+                    <input type="number" id="conductors-per-phase" value="1" min="1" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <label for="neutral-section">Section du neutre (mm²)</label>
+                    <input type="number" id="neutral-section" value="70" min="0" step="1">
+                </div>
+                
+                <div class="input-group">
+                    <label for="conductors-per-neutral">Nombre de conducteurs par neutre</label>
+                    <input type="number" id="conductors-per-neutral" value="1" min="0" step="1">
+                </div>
+            </div>
+        </div>
+        
+        <button onclick="calculate()">Calculer les courants de court-circuit</button>
+        
+        <div id="result" class="results" style="display: none;">
+            <h2>Résultats des calculs</h2>
+            
+            <div class="result-item">
+                <span>Courant de court-circuit triphasé (Ik3)</span>
+                <span><span id="ik3" class="result-value">0</span> <span class="unit">kA</span></span>
+            </div>
+            
+            <div class="result-item">
+                <span>Courant de court-circuit biphasé (Ik2)</span>
+                <span><span id="ik2" class="result-value">0</span> <span class="unit">kA</span></span>
+            </div>
+            
+            <div class="result-item">
+                <span>Courant de court-circuit monophasé (Ik1)</span>
+                <span><span id="ik1" class="result-value">0</span> <span class="unit">kA</span></span>
+            </div>
+            
+            <div class="note">
+                <p>Note: Ces calculs sont basés sur les normes CEI 60909 et NF C15-100. Pour des installations complexes, une vérification par un expert est recommandée.</p>
+            </div>
+        </div>
+    </div>
 
-  <h1>Calcul des courants de court-circuit IK3, IK2, IK1</h1>
-
-  <label>Puissance du transformateur (kVA) :</label>
-  <input type="number" id="kva" value="400">
-
-  <label>Tension secondaire (V) :</label>
-  <input type="number" id="voltage" value="400">
-
-  <label>Ucc (%) :</label>
-  <input type="number" id="ucc" value="6">
-
-  <label>Couplage :</label>
-  <select id="couplage">
-    <option value="Dyn5">Dyn5</option>
-    <option value="Yy0">Yy0</option>
-    <option value="Yd11">Yd11</option>
-  </select>
-
-  <label>Matériau de l’âme :</label>
-  <select id="materiau">
-    <option value="cuivre">Cuivre</option>
-    <option value="aluminium">Aluminium</option>
-  </select>
-
-  <label>Longueur du câble (m) :</label>
-  <input type="number" id="longueur" value="20">
-
-  <label>Section de phase (mm²) :</label>
-  <input type="number" id="section_phase" value="50">
-
-  <label>Nombre de conducteurs par phase :</label>
-  <input type="number" id="nb_phase" value="1">
-
-  <label>Section du conducteur de neutre (mm²) :</label>
-  <input type="number" id="section_neutre" value="50">
-
-  <label>Nombre de conducteurs de neutre :</label>
-  <input type="number" id="nb_neutre" value="1">
-
-  <button onclick="calculer()">Calculer</button>
-
-  <div class="result" id="result"></div>
-
-  <script>
-    function calculer() {
-      const kva = parseFloat(document.getElementById('kva').value);
-      const voltage = parseFloat(document.getElementById('voltage').value);
-      const ucc = parseFloat(document.getElementById('ucc').value);
-      const couplage = document.getElementById('couplage').value;
-      const materiau = document.getElementById('materiau').value;
-      const longueur = parseFloat(document.getElementById('longueur').value);
-      const section_phase = parseFloat(document.getElementById('section_phase').value);
-      const nb_phase = parseInt(document.getElementById('nb_phase').value);
-      const section_neutre = parseFloat(document.getElementById('section_neutre').value);
-      const nb_neutre = parseInt(document.getElementById('nb_neutre').value);
-
-      if (isNaN(kva) || isNaN(voltage) || isNaN(ucc) || isNaN(longueur) ||
-          isNaN(section_phase) || isNaN(nb_phase) || isNaN(section_neutre) || isNaN(nb_neutre)) {
-        document.getElementById('result').innerText = 'Veuillez remplir tous les champs correctement.';
-        return;
-      }
-
-      // Calcul de Ik3
-      const ik3 = (kva * 1000) / (voltage * (ucc / 100));
-
-      // Résistivité en ohm.mm²/m
-      const resistivite = materiau === 'cuivre' ? 0.0172 : 0.0282;
-
-      // Résistance de la phase
-      const r_phase = (resistivite * longueur) / (section_phase * nb_phase);
-
-      // Résistance du neutre
-      const r_neutre = (resistivite * longueur) / (section_neutre * nb_neutre);
-
-      // Calcul de Ik2 (approximativement Ik3 / √3)
-      const ik2 = ik3 / Math.sqrt(3);
-
-      // Calcul de Ik1 (approximativement Ik3 / √3, ajusté selon le couplage)
-      let ik1 = ik3 / Math.sqrt(3);
-      if (couplage === 'Yy0') {
-        ik1 *= 0.95; // Ajustement pour Yy0
-      } else if (couplage === 'Yd11') {
-        ik1 *= 0.9; // Ajustement pour Yd11
-      }
-
-      document.getElementById('result').innerHTML = `
-        <p><strong>Résultats :</strong></p>
-        <p>Ik3 (court-circuit triphasé) : ${ik3.toFixed(2)} A</p>
-        <p>Ik2 (court-circuit biphasé) : ${ik2.toFixed(2)} A</p>
-        <p>Ik1 (court-circuit monophasé) : ${ik1.toFixed(2)} A</p>
-      `;
-    }
-  </script>
-
+    <script>
+        // Constantes physiques
+        const RHO_CU = 0.0225;   // Résistivité du cuivre (Ω.mm²/m à 20°C)
+        const RHO_AL = 0.036;    // Résistivité de l'aluminium (Ω.mm²/m à 20°C)
+        const X_L = 0.08 / 1000; // Réactance linéique (Ω/m) - valeur typique pour câbles BT
+        
+        function calculate() {
+            // Récupération des valeurs d'entrée
+            const Sn = parseFloat(document.getElementById('transfo-power').value) * 1000; // Conversion en VA
+            const U2 = parseFloat(document.getElementById('secondary-voltage').value);
+            const couplage = document.getElementById('couplage').value;
+            const ucc = parseFloat(document.getElementById('ucc').value) / 100; // Conversion en fraction
+            const L = parseFloat(document.getElementById('cable-length').value);
+            const Sph = parseFloat(document.getElementById('phase-section').value);
+            const nph = parseInt(document.getElementById('conductors-per-phase').value);
+            const Sne = parseFloat(document.getElementById('neutral-section').value);
+            const nne = parseInt(document.getElementById('conductors-per-neutral').value);
+            
+            // 1. Calcul de l'impédance du transformateur
+            const Zt = ucc * Math.pow(U2, 2) / Sn;
+            
+            // 2. Calcul des impédances des câbles
+            // Résistance des phases
+            const Rph = (RHO_CU * L) / (Sph * nph);
+            // Réactance des phases
+            const Xph = X_L * L;
+            // Impédance des phases
+            const Zph = Math.sqrt(Math.pow(Rph, 2) + Math.pow(Xph, 2));
+            
+            // Résistance du neutre (si section > 0)
+            const Rne = Sne > 0 ? (RHO_CU * L) / (Sne * nne) : 0;
+            // Réactance du neutre
+            const Xne = Sne > 0 ? X_L * L : 0;
+            // Impédance du neutre
+            const Zne = Math.sqrt(Math.pow(Rne, 2) + Math.pow(Xne, 2));
+            
+            // 3. Calcul des courants de court-circuit
+            // Court-circuit triphasé (Ik3)
+            const Zk3 = Math.sqrt(Math.pow(Zt + Zph, 2));
+            const Ik3 = (U2 / Math.sqrt(3)) / Zk3;
+            
+            // Court-circuit biphasé (Ik2)
+            const Ik2 = Ik3 * Math.sqrt(3) / 2;
+            
+            // Court-circuit monophasé (Ik1)
+            let m = 1; // Coefficient selon le couplage
+            if (couplage.startsWith('D') || couplage.startsWith('d')) {
+                m = 3; // Couplage triangle
+            } else if (couplage.startsWith('Yz') || couplage.startsWith('yz')) {
+                m = 2; // Couplage zig-zag
+            }
+            
+            const Zk1 = Math.sqrt(Math.pow(2*Zph + m*Zne + Zt*(2 + m), 2));
+            const Ik1 = Sne > 0 ? (U2 / Math.sqrt(3)) / Zk1 : 0;
+            
+            // Affichage des résultats en kA avec 2 décimales
+            document.getElementById('ik3').textContent = (Ik3 / 1000).toFixed(2);
+            document.getElementById('ik2').textContent = (Ik2 / 1000).toFixed(2);
+            document.getElementById('ik1').textContent = Sne > 0 ? (Ik1 / 1000).toFixed(2) : "Non calculable";
+            document.getElementById('result').style.display = 'block';
+        }
+    </script>
 </body>
 </html>
