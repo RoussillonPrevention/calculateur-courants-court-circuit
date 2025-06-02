@@ -1,0 +1,596 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculateur de Protection des Circuits</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            color: #333;
+            max-width: 1200px;
+            margin: auto;
+            background-color: #f5f5f5;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            padding-bottom: 10px;
+            border-bottom: 2px solid #3498db;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+        .section {
+            flex: 1;
+            min-width: 300px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .section-title {
+            color: #2c3e50;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            box-sizing: border-box;
+            font-size: 16px;
+        }
+        input[type="number"] {
+            padding: 10px;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+            transition: background 0.3s;
+        }
+        button:hover {
+            background: #2980b9;
+        }
+        .results {
+            margin-top: 30px;
+            padding: 20px;
+            background: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+            display: none;
+        }
+        .result-item {
+            margin-bottom: 15px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid #eee;
+        }
+        .result-title {
+            font-weight: bold;
+            color: #2c3e50;
+            margin-bottom: 5px;
+        }
+        .result-value {
+            font-size: 18px;
+            color: #e74c3c;
+        }
+        .note {
+            font-size: 14px;
+            color: #7f8c8d;
+            margin-top: 5px;
+        }
+        .tooltip {
+            position: relative;
+            display: inline-block;
+            cursor: help;
+            margin-left: 5px;
+        }
+        .tooltip .tooltiptext {
+            visibility: hidden;
+            width: 250px;
+            background-color: #555;
+            color: #fff;
+            text-align: center;
+            border-radius: 6px;
+            padding: 5px;
+            position: absolute;
+            z-index: 1;
+            bottom: 125%;
+            left: 50%;
+            margin-left: -125px;
+            opacity: 0;
+            transition: opacity 0.3s;
+            font-size: 14px;
+            font-weight: normal;
+        }
+        .tooltip:hover .tooltiptext {
+            visibility: visible;
+            opacity: 1;
+        }
+        .tab-container {
+            display: flex;
+            margin-bottom: 20px;
+        }
+        .tab {
+            padding: 10px 15px;
+            background: #eee;
+            cursor: pointer;
+            border: 1px solid #ddd;
+            border-bottom: none;
+            border-radius: 5px 5px 0 0;
+            margin-right: 5px;
+        }
+        .tab.active {
+            background: white;
+            border-bottom: 1px solid white;
+            font-weight: bold;
+        }
+        .tab-content {
+            display: none;
+            padding: 15px;
+            background: white;
+            border: 1px solid #ddd;
+            border-radius: 0 0 5px 5px;
+        }
+        .tab-content.active {
+            display: block;
+        }
+        .conductor-type {
+            display: flex;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .conductor-type input {
+            width: auto;
+            margin-right: 10px;
+        }
+        .conductor-type label {
+            margin-bottom: 0;
+        }
+        .k-method {
+            margin-top: 10px;
+            padding: 10px;
+            background: #f9f9f9;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Calculateur de Protection des Circuits</h1>
+    <h2 style="text-align: center; color: #7f8c8d;">Détermination des disjoncteurs et fusibles conformes</h2>
+    
+    <div class="container">
+        <div class="section">
+            <h2 class="section-title">Caractéristiques du câble</h2>
+            
+            <div class="form-group">
+                <label for="cable-type">Type de câble :</label>
+                <select id="cable-type">
+                    <optgroup label="Câbles PR">
+                        <option value="U1000R2V">U1000R2V</option>
+                        <option value="U1000RGPFV">U1000RGPFV</option>
+                        <option value="U1000RVFV">U1000RVFV</option>
+                    </optgroup>
+                    <optgroup label="Série H07">
+                        <option value="H07B">H07B</option>
+                        <option value="H07RNF">H07RNF</option>
+                        <option value="H07RNF85">H07RNF (85°C)</option>
+                        <option value="H07RNF90">H07RNF (90°C)</option>
+                        <option value="H07RNF8F">H07RNF8F</option>
+                    </optgroup>
+                    <optgroup label="Autres séries">
+                        <option value="H05RNF">H05RNF</option>
+                        <option value="H05VV">H05VV</option>
+                        <option value="CR1_PR">CR1 (PR)</option>
+                        <option value="CR1_PRV">CR1 (PRV)</option>
+                        <option value="FRN05">Série FRN05</option>
+                        <option value="other_PR">Autre PR (FRNO7, FR-N1, H05B...)</option>
+                        <option value="other_PVC">Autre PVC (H07V(V), A05VV...)</option>
+                    </optgroup>
+                </select>
+                <span class="tooltip">(?)
+                    <span class="tooltiptext">Le type de câble détermine sa température maximale et son courant admissible</span>
+                </span>
+            </div>
+            
+            <div class="form-group">
+                <label>Âme du conducteur :</label>
+                <div class="conductor-type">
+                    <input type="radio" id="copper" name="conductor-material" value="copper" checked>
+                    <label for="copper">Cuivre</label>
+                </div>
+                <div class="conductor-type">
+                    <input type="radio" id="aluminium" name="conductor-material" value="aluminium">
+                    <label for="aluminium">Aluminium</label>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="circuit-type">Type de circuit :</label>
+                <select id="circuit-type">
+                    <option value="monophase">Monophasé</option>
+                    <option value="triphase">Triphasé</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="section">Section des conducteurs (mm²) :</label>
+                <select id="section">
+                    <option value="1.5">1,5 mm²</option>
+                    <option value="2.5">2,5 mm²</option>
+                    <option value="4">4 mm²</option>
+                    <option value="6">6 mm²</option>
+                    <option value="10">10 mm²</option>
+                    <option value="16">16 mm²</option>
+                    <option value="25">25 mm²</option>
+                    <option value="35">35 mm²</option>
+                    <option value="50">50 mm²</option>
+                    <option value="70">70 mm²</option>
+                    <option value="95">95 mm²</option>
+                    <option value="120">120 mm²</option>
+                    <option value="150">150 mm²</option>
+                    <option value="185">185 mm²</option>
+                    <option value="240">240 mm²</option>
+                    <option value="300">300 mm²</option>
+                    <option value="400">400 mm²</option>
+                    <option value="500">500 mm²</option>
+                    <option value="630">630 mm²</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="parallel-conductors">Nombre de conducteurs en parallèle par phase :</label>
+                <select id="parallel-conductors">
+                    <option value="1">1</option>
+                    <option value="2">2</option>
+                    <option value="3">3</option>
+                    <option value="4">4</option>
+                </select>
+            </div>
+        </div>
+        
+        <div class="section">
+            <h2 class="section-title">Conditions d'installation</h2>
+            
+            <div class="form-group">
+                <label for="installation-mode">Mode de pose :</label>
+                <select id="installation-mode">
+                    <option value="B">B - Encastrés dans des parois, montage apparent, goulottes, etc.</option>
+                    <option value="C">C - Fixés aux parois, sur chemin de câbles non perforés</option>
+                    <option value="D">D - Canalisations enterrées</option>
+                    <option value="E">E - Câbles MULTIPOLAIRES: sur corbeaux, échelles, chemins perforés</option>
+                    <option value="F">F - Câbles UNIPOLAIRES: sur corbeaux, échelles, chemins perforés</option>
+                </select>
+                <span class="tooltip">(?)
+                    <span class="tooltiptext">Le mode de pose influence la dissipation thermique et donc le courant admissible</span>
+                </span>
+            </div>
+            
+            <div class="form-group">
+                <label for="ambient-temp">Température ambiante (°C) :</label>
+                <input type="number" id="ambient-temp" min="10" max="60" value="30">
+            </div>
+            
+            <div class="form-group">
+                <label for="k-method">Coefficient K :</label>
+                <div class="k-method">
+                    <div class="conductor-type">
+                        <input type="radio" id="k-default" name="k-method" value="default" checked>
+                        <label for="k-default">Par défaut (0,8)</label>
+                    </div>
+                    <div class="conductor-type">
+                        <input type="radio" id="k-mode" name="k-method" value="mode">
+                        <label for="k-mode">Selon mode de pose</label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="protection-type">Type de protection :</label>
+                <select id="protection-type">
+                    <option value="both">Disjoncteur et fusible</option>
+                    <option value="breaker">Disjoncteur seulement</option>
+                    <option value="fuse">Fusible seulement</option>
+                </select>
+            </div>
+        </div>
+    </div>
+    
+    <button id="calculate-btn">Calculer les protections</button>
+    
+    <div class="results" id="results">
+        <h2 class="section-title">Résultats</h2>
+        
+        <div class="tab-container">
+            <div class="tab active" data-tab="general">Informations générales</div>
+            <div class="tab" data-tab="breakers">Disjoncteurs</div>
+            <div class="tab" data-tab="fuses">Fusibles</div>
+        </div>
+        
+        <div class="tab-content active" id="general-tab">
+            <div class="result-item">
+                <div class="result-title">Courant admissible (Iz) :</div>
+                <div class="result-value" id="iz-result">-</div>
+                <div class="note">Courant que peut supporter le câble dans les conditions d'installation</div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-title">Courant de calcul (Ib) :</div>
+                <div class="result-value" id="ib-result">-</div>
+                <div class="note">Courant maximal que doit pouvoir supporter la protection</div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-title">Coefficient K appliqué :</div>
+                <div class="result-value" id="k-result">-</div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="breakers-tab">
+            <div class="result-item">
+                <div class="result-title">Calibre du disjoncteur :</div>
+                <div class="result-value" id="breaker-rating">-</div>
+                <div class="note">Valeur normalisée immédiatement supérieure à Ib et inférieure à Iz</div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-title">Type de disjoncteur recommandé :</div>
+                <div class="result-value" id="breaker-type">-</div>
+                <div class="note">Type B, C ou D selon l'utilisation</div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-title">Courant de déclenchement magnétique :</div>
+                <div class="result-value" id="magnetic-trip">-</div>
+            </div>
+        </div>
+        
+        <div class="tab-content" id="fuses-tab">
+            <div class="result-item">
+                <div class="result-title">Calibre du fusible :</div>
+                <div class="result-value" id="fuse-rating">-</div>
+                <div class="note">Valeur normalisée immédiatement supérieure à Ib et inférieure à Iz</div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-title">Type de fusible recommandé :</div>
+                <div class="result-value" id="fuse-type">-</div>
+                <div class="note">gG, aM, etc. selon l'application</div>
+            </div>
+            
+            <div class="result-item">
+                <div class="result-title">Courant de fusion :</div>
+                <div class="result-value" id="fuse-melting">-</div>
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            // Gestion des onglets
+            const tabs = document.querySelectorAll('.tab');
+            tabs.forEach(tab => {
+                tab.addEventListener('click', function() {
+                    // Retirer la classe active de tous les onglets et contenus
+                    document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+                    document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+                    
+                    // Ajouter la classe active à l'onglet cliqué
+                    this.classList.add('active');
+                    const tabId = this.getAttribute('data-tab');
+                    document.getElementById(tabId + '-tab').classList.add('active');
+                });
+            });
+            
+            // Gestion du calcul
+            document.getElementById('calculate-btn').addEventListener('click', calculateProtection);
+            
+            function calculateProtection() {
+                // Récupération des paramètres
+                const cableType = document.getElementById('cable-type').value;
+                const material = document.querySelector('input[name="conductor-material"]:checked').value;
+                const circuitType = document.getElementById('circuit-type').value;
+                const section = parseFloat(document.getElementById('section').value);
+                const parallelConductors = parseInt(document.getElementById('parallel-conductors').value);
+                const installationMode = document.getElementById('installation-mode').value;
+                const ambientTemp = parseInt(document.getElementById('ambient-temp').value);
+                const kMethod = document.querySelector('input[name="k-method"]:checked').value;
+                const protectionType = document.getElementById('protection-type').value;
+                
+                // Calcul du courant admissible (Iz)
+                let iz = calculateIz(cableType, section, material, installationMode, ambientTemp);
+                iz *= parallelConductors; // Prise en compte des conducteurs en parallèle
+                
+                // Calcul du coefficient K
+                let k = 0.8; // Valeur par défaut
+                if (kMethod === 'mode') {
+                    k = getKForInstallationMode(installationMode);
+                }
+                
+                // Calcul du courant de calcul (Ib)
+                const ib = iz * k;
+                
+                // Détermination des protections
+                const breakerRating = calculateBreakerRating(ib, iz);
+                const fuseRating = calculateFuseRating(ib, iz);
+                
+                // Affichage des résultats
+                document.getElementById('results').style.display = 'block';
+                document.getElementById('iz-result').textContent = iz.toFixed(2) + ' A';
+                document.getElementById('ib-result').textContent = ib.toFixed(2) + ' A';
+                document.getElementById('k-result').textContent = k;
+                
+                if (protectionType === 'both' || protectionType === 'breaker') {
+                    document.getElementById('breaker-rating').textContent = breakerRating.rating + ' A';
+                    document.getElementById('breaker-type').textContent = breakerRating.type;
+                    document.getElementById('magnetic-trip').textContent = breakerRating.magneticTrip;
+                }
+                
+                if (protectionType === 'both' || protectionType === 'fuse') {
+                    document.getElementById('fuse-rating').textContent = fuseRating.rating + ' A';
+                    document.getElementById('fuse-type').textContent = fuseRating.type;
+                    document.getElementById('fuse-melting').textContent = fuseRating.melting;
+                }
+                
+                // Masquer les onglets non pertinents
+                if (protectionType === 'breaker') {
+                    document.querySelector('[data-tab="fuses"]').style.display = 'none';
+                    document.querySelector('[data-tab="breakers"]').click();
+                } else if (protectionType === 'fuse') {
+                    document.querySelector('[data-tab="breakers"]').style.display = 'none';
+                    document.querySelector('[data-tab="fuses"]').click();
+                } else {
+                    document.querySelector('[data-tab="breakers"]').style.display = 'block';
+                    document.querySelector('[data-tab="fuses"]').style.display = 'block';
+                }
+            }
+            
+            function calculateIz(cableType, section, material, installationMode, ambientTemp) {
+                // Tableaux de référence pour les courants admissibles selon le type de câble
+                // Ces valeurs sont des exemples et doivent être remplacées par les valeurs normatives exactes
+                const izTables = {
+                    // Valeurs pour cuivre à 30°C - à adapter selon les normes
+                    'U1000R2V': {
+                        'B': [19.5, 27, 36, 46, 63, 85, 115, 150, 190, 240, 300, 370, 450, 540, 650],
+                        'C': [17.5, 24, 32, 41, 56, 76, 103, 135, 171, 216, 270, 333, 405, 486, 585],
+                        'D': [16, 22, 29, 38, 52, 70, 95, 125, 158, 200, 250, 308, 375, 450, 542],
+                        'E': [15, 21, 28, 36, 49, 66, 90, 118, 150, 190, 237, 292, 356, 427, 514],
+                        'F': [14, 19, 26, 33, 45, 61, 83, 109, 138, 175, 219, 270, 329, 395, 475]
+                    },
+                    'H07RNF': {
+                        'B': [18, 25, 34, 43, 60, 80, 110, 145, 185, 235, 295, 365, 445, 535, 645],
+                        'C': [16, 22, 30, 39, 54, 72, 99, 130, 166, 211, 265, 328, 400, 481, 580],
+                        'D': [15, 20, 27, 35, 48, 65, 89, 117, 149, 189, 237, 293, 357, 429, 517],
+                        'E': [14, 19, 26, 33, 45, 61, 84, 110, 140, 178, 223, 276, 336, 404, 487],
+                        'F': [13, 18, 24, 31, 42, 57, 78, 103, 131, 166, 208, 258, 314, 377, 454]
+                    }
+                    // Ajouter les autres types de câbles avec leurs valeurs spécifiques
+                };
+                
+                // Index des sections dans le tableau (1.5=0, 2.5=1, ..., 630=14)
+                const sectionIndex = [1.5, 2.5, 4, 6, 10, 16, 25, 35, 50, 70, 95, 120, 150, 185, 240].indexOf(section);
+                
+                // Récupération de la valeur de base
+                let iz = izTables['U1000R2V'][installationMode][sectionIndex]; // Valeur par défaut
+                
+                if (izTables[cableType]) {
+                    iz = izTables[cableType][installationMode][sectionIndex];
+                }
+                
+                // Correction pour l'aluminium (environ 77% du cuivre)
+                if (material === 'aluminium') {
+                    iz *= 0.77;
+                }
+                
+                // Correction pour la température ambiante
+                if (ambientTemp > 30) {
+                    // Réduction d'environ 3% par °C au-dessus de 30°C
+                    iz *= 1 - ((ambientTemp - 30) * 0.03);
+                } else if (ambientTemp < 30) {
+                    // Augmentation d'environ 1% par °C en-dessous de 30°C
+                    iz *= 1 + ((30 - ambientTemp) * 0.01);
+                }
+                
+                return iz;
+            }
+            
+            function getKForInstallationMode(mode) {
+                // Coefficients K selon le mode de pose
+                const kValues = {
+                    'B': 0.8,
+                    'C': 0.85,
+                    'D': 0.9,
+                    'E': 0.75,
+                    'F': 0.7
+                };
+                return kValues[mode];
+            }
+            
+            function calculateBreakerRating(ib, iz) {
+                // Calibres normalisés des disjoncteurs
+                const standardRatings = [6, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000];
+                
+                // Trouver le calibre immédiatement supérieur à Ib et inférieur à Iz
+                let rating = standardRatings.find(r => r >= ib && r <= iz);
+                
+                // Si aucun calibre ne convient, prendre le plus proche
+                if (!rating) {
+                    rating = standardRatings.reduce((prev, curr) => {
+                        return (Math.abs(curr - ib) < Math.abs(prev - ib) ? curr : prev);
+                    });
+                }
+                
+                // Détermination du type de disjoncteur (B, C ou D)
+                let type = 'B'; // Standard pour usages généraux
+                if (rating >= 100) type = 'C'; // Pour circuits avec courants d'appel moyens
+                if (rating >= 250) type = 'D'; // Pour circuits avec forts courants d'appel
+                
+                // Courant de déclenchement magnétique (5In pour B, 10In pour C, 20In pour D)
+                const magneticTrip = {
+                    'B': rating * 5,
+                    'C': rating * 10,
+                    'D': rating * 20
+                }[type] + ' A';
+                
+                return {
+                    rating: rating,
+                    type: type,
+                    magneticTrip: magneticTrip
+                };
+            }
+            
+            function calculateFuseRating(ib, iz) {
+                // Calibres normalisés des fusibles
+                const standardRatings = [2, 4, 6, 8, 10, 16, 20, 25, 32, 40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, 500, 630, 800, 1000];
+                
+                // Trouver le calibre immédiatement supérieur à Ib et inférieur à Iz
+                let rating = standardRatings.find(r => r >= ib && r <= iz);
+                
+                // Si aucun calibre ne convient, prendre le plus proche
+                if (!rating) {
+                    rating = standardRatings.reduce((prev, curr) => {
+                        return (Math.abs(curr - ib) < Math.abs(prev - ib) ? curr : prev);
+                    });
+                }
+                
+                // Type de fusible (gG pour usages généraux, aM pour moteurs)
+                const type = 'gG';
+                
+                // Courant de fusion (environ 1.6 à 2.1 fois In selon le type)
+                const melting = (rating * 1.8).toFixed(0) + ' A';
+                
+                return {
+                    rating: rating,
+                    type: type,
+                    melting: melting
+                };
+            }
+        });
+    </script>
+</body>
+</html>
